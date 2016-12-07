@@ -12,10 +12,15 @@ data Board = Board { rows :: [[Block]]}
 data Block = Unknown | Swell | Hit | Miss
     deriving (Eq,Show)
 
+data Ship = Ship {orientation :: Orientation, shipType :: ShipType}
+
 -- There are 5 different ship types which differ in size, from size 1
 -- to size 5.
-data Ship = Destroyer | Submarine | Cruiser | Battleship | Carrier
+data ShipType = Destroyer | Submarine | Cruiser | Battleship | Carrier
     deriving (Show)
+
+-- The ships either lie vertically or horizontally.
+data Orientation = Vertical | Horizontal
 
 -- Represents a position on the board with x and y coordinates.
 data Position = Position {x :: Int, y :: Int}

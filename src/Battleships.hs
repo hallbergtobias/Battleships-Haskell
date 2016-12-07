@@ -5,7 +5,7 @@ import RunGame
 
 -- tomt spelbräde
 emptyBoard :: Board
-emptyBoard = undefined
+emptyBoard = Board (replicate 10 (replicate 10 Unknown))
 
 
 -- adds all ships to board
@@ -19,8 +19,11 @@ addShipRandom = undefined
 
 
 -- adds a ship at the selected position
+addShipIfOk :: Board -> Ship -> Position -> Board
+addShipIfOk board ship pos = undefined
+
 addShip :: Board -> Ship -> Position -> Board
-addShip = undefined
+addShip board ship pos = undefined
 
 
 -- returns the size of a ship
