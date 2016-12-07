@@ -19,10 +19,10 @@ addShipRandom = undefined
 
 
 -- adds a ship at the selected position
-addShipIfOk :: Board -> ShipType -> Position -> Board
+addShipIfOk :: Board -> Ship -> Position -> Board
 addShipIfOk board ship pos = undefined
 
-addShip :: Board -> ShipType -> Position -> Board
+addShip :: Board -> Ship -> Position -> Board
 addShip board ship pos = undefined
 
 
