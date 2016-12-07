@@ -62,9 +62,17 @@ printGame = undefined
 readGame :: FilePath -> IO Game
 readGame = undefined
 
-
+-- shoots at selected position. If there is a ship at the position it will get
+-- hit.
 shoot :: Board -> Position -> Board
-shoot = undefined
+shoot (Board b) (Position x y) = Board (take y b ++ [shoot' (b !! y) x] ++ drop (y+1) b)
+    where shoot' :: [Block] -> Int -> [Block]
+          shoot' b x = take x b ++ [shoot'' (b !! x)] ++ drop (x+1) b
+          shoot'' :: Block -> Block
+          shoot'' ShipPart = Hit
+          shoot'' Hit      = Hit
+          shoot'' b        = Miss
+
 
 
 gameOver :: Board -> Bool
