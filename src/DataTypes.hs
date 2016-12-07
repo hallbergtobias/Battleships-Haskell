@@ -9,7 +9,7 @@ data Board = Board { rows :: [[Block]]}
     deriving (Show)
 
 -- The blocks of the board are of the following states.
-data Block = Unknown | Vehichle | Swell | Hit | Miss
+data Block = Unknown | Swell | Hit | Miss
     deriving (Show)
 
 -- There are 5 different ship types which differ in size, from size 1
