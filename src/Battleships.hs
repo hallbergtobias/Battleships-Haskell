@@ -19,9 +19,18 @@ addShipRandom = undefined
 
 
 -- adds a ship at the selected position
-addShipIfOk :: Board -> Ship -> Position -> Board
+isShipAddOk :: Board -> Ship -> Position -> Bool
+isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
+               isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
 
-addShipIfOk (Board matrix) (Ship ori shipT) (Position x y) | (ori == Vertical) = Board (drop y matrix)
+
+                                                           | ori == Vertical = undefined
+       where
+          isShipAddOk' :: Int -> Int -> Int -> [Block] -> Bool
+          isShipAddOk' x i sSize list | i < sSize = ((list !! (x+i)) == Unknown) && isShipAddOk' x (i+1) sSize list
+                                      | otherwise = True
+
+
 
 addShip :: Board -> Ship -> Position -> Board
 addShip board (Ship orientation shiptype) pos = undefined
