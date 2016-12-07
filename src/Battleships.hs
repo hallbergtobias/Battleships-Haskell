@@ -23,12 +23,15 @@ isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
 
-
-                                                           | ori == Vertical = undefined
+                                                           | ori == Vertical =
+               isShipAddOk' y 0 (shipSize shipT) (vertList (map (drop x) matrix))
        where
           isShipAddOk' :: Int -> Int -> Int -> [Block] -> Bool
           isShipAddOk' x i sSize list | i < sSize = ((list !! (x+i)) == Unknown) && isShipAddOk' x (i+1) sSize list
                                       | otherwise = True
+          vertList :: [[Block]] -> [Block]
+          vertList [] = []
+          vertList ((x:xs):ys) = [x] ++ vertList ys
 
 
 
@@ -87,17 +90,9 @@ printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
 readGame :: FilePath -> IO Game
 readGame = undefined
 
--- shoots at selected position. If there is a ship at the position it will get
--- hit.
-shoot :: Board -> Position -> Board
-shoot (Board b) (Position x y) = Board (take y b ++ [shoot' (b !! y) x] ++ drop (y+1) b)
-    where shoot' :: [Block] -> Int -> [Block]
-          shoot' b x = take x b ++ [shoot'' (b !! x)] ++ drop (x+1) b
-          shoot'' :: Block -> Block
-          shoot'' ShipPart = Hit
-          shoot'' Hit      = Hit
-          shoot'' b        = Miss
 
+shoot :: Board -> Position -> Board
+shoot = undefined
 
 
 gameOver :: Board -> Bool
