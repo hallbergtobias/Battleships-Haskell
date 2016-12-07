@@ -1,10 +1,11 @@
+module DataTypes where
 
 -- Game represents the game by linking two boards together, one for
 -- the enemy and one for yourself.
 data Game = Game {board1 :: Board, board2 :: Board}
 
 -- A grid containting 10x10 blocks.
-data Board = Board { rows :: [[Blocks]]}
+data Board = Board { rows :: [[Block]]}
 
 -- The blocks of the board are of the following states.
 data Block = Unknown | Vehichle | Swell | Hit | Miss
