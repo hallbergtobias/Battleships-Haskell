@@ -9,7 +9,7 @@ data Board = Board { rows :: [[Block]]}
     deriving (Show)
 
 -- The blocks of the board are of the following states.
-data Block = Unknown | Swell | Hit | Miss
+data Block = Unknown | ShipPart | Swell | Hit | Miss
     deriving (Eq,Show)
 
 data Ship = Ship {orientation :: Orientation, shipType :: ShipType}
