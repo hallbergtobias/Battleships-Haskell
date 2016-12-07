@@ -14,20 +14,20 @@ fillBoard = undefined
 
 
 -- adds a ship at a random position of the board
-addShipRandom :: Board -> Ship -> Board
+addShipRandom :: Board -> ShipType -> Board
 addShipRandom = undefined
 
 
 -- adds a ship at the selected position
-addShipIfOk :: Board -> Ship -> Position -> Board
+addShipIfOk :: Board -> ShipType -> Position -> Board
 addShipIfOk board ship pos = undefined
 
-addShip :: Board -> Ship -> Position -> Board
+addShip :: Board -> ShipType -> Position -> Board
 addShip board ship pos = undefined
 
 
 -- returns the size of a ship
-shipSize :: Ship -> Int
+shipSize :: ShipType -> Int
 shipSize Destroyer = 1
 shipSize Submarine = 2
 shipSize Cruiser = 3
