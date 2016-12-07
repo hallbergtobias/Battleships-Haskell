@@ -62,11 +62,26 @@ nbrOfHits (Board (x:xs)) = nbrOfHits' x + nbrOfHits (Board xs)
 
 -- returns the minimum number of hits required to win
 nbrOfHitsLeft :: Board -> Int
-nbrOfHitsLeft = undefined
+nbrOfHitsLeft (Board []) = 0
+nbrOfHitsLeft (Board (x:xs)) = nbrOfHitsLeft' x + nbrOfHitsLeft (Board xs)
+    where nbrOfHitsLeft' :: [Block] -> Int
+          nbrOfHitsLeft' [] = 0
+          nbrOfHitsLeft' (ShipPart:xs) = 1 + nbrOfHitsLeft' xs
+          nbrOfHitsLeft' (_:xs)   = nbrOfHitsLeft' xs
 
-
+-- prints a game
 printGame :: Game -> IO ()
-printGame = undefined
+printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
+    ++ printGame' False b1 ++ "\n----Enemy ships----\n" ++ printGame' True b2)
+    where printGame' :: Bool -> [[Block]] -> String
+          printGame' secret b = concatMap (++"\n") (map (concatMap (printBlock secret)) b)
+          printBlock :: Bool -> Block -> String
+          printBlock _ Hit = "x "
+          printBlock _ Miss = "0 "
+          printBlock _ Unknown = "~ "
+          printBlock _ Swell = "~ "
+          printBlock True ShipPart = "~ "
+          printBlock _ ShipPart = "• "
 
 
 readGame :: FilePath -> IO Game
