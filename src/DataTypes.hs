@@ -21,6 +21,7 @@ data ShipType = Destroyer | Submarine | Cruiser | Battleship | Carrier
 
 -- The ships either lie vertically or horizontally.
 data Orientation = Vertical | Horizontal
+    deriving (Eq,Show)
 
 -- Represents a position on the board with x and y coordinates.
 data Position = Position {x :: Int, y :: Int}

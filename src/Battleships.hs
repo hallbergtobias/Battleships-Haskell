@@ -20,10 +20,11 @@ addShipRandom = undefined
 
 -- adds a ship at the selected position
 addShipIfOk :: Board -> Ship -> Position -> Board
-addShipIfOk board ship pos = undefined
+
+addShipIfOk (Board matrix) (Ship ori shipT) (Position x y) | (ori == Vertical) = Board (drop y matrix)
 
 addShip :: Board -> Ship -> Position -> Board
-addShip board ship pos = undefined
+addShip board (Ship orientation shiptype) pos = undefined
 
 
 -- returns the size of a ship
