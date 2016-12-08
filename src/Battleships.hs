@@ -52,25 +52,20 @@ shipSize Carrier = 5
 nbrOfShips :: Board -> Int
 nbrOfShips = undefined
 
-
 -- returns the number of hits on a board
 nbrOfHits :: Board -> Int
-nbrOfHits (Board []) = 0
-nbrOfHits (Board (x:xs)) = nbrOfHits' x + nbrOfHits (Board xs)
-    where nbrOfHits' :: [Block] -> Int
-          nbrOfHits' [] = 0
-          nbrOfHits' (Hit:xs) = 1 + nbrOfHits' xs
-          nbrOfHits' (_:xs)   = nbrOfHits' xs
-
+nbrOfHits b = nbrOf b Hit
 
 -- returns the minimum number of hits required to win
 nbrOfHitsLeft :: Board -> Int
-nbrOfHitsLeft (Board []) = 0
-nbrOfHitsLeft (Board (x:xs)) = nbrOfHitsLeft' x + nbrOfHitsLeft (Board xs)
-    where nbrOfHitsLeft' :: [Block] -> Int
-          nbrOfHitsLeft' [] = 0
-          nbrOfHitsLeft' (ShipPart:xs) = 1 + nbrOfHitsLeft' xs
-          nbrOfHitsLeft' (_:xs)   = nbrOfHitsLeft' xs
+nbrOfHitsLeft b = nbrOf b ShipPart
+
+-- counts the number of elements of a block type in a board
+nbrOf :: Board -> Block -> Int
+nbrOf (Board []) block     = 0
+nbrOf (Board (x:xs)) block = nbrOf' x block + nbrOf (Board xs) block
+    where nbrOf' :: [Block] -> Block -> Int
+          nbrOf' xs block = length (filter (\x -> x == block) xs)
 
 -- prints a game
 printGame :: Game -> IO ()
@@ -92,7 +87,13 @@ readGame = undefined
 
 
 shoot :: Board -> Position -> Board
-shoot = undefined
+shoot (Board b) (Position x y) = Board (take y b ++ [shoot' (b !! y) x] ++ drop (y+1) b)
+    where shoot' :: [Block] -> Int -> [Block]
+          shoot' b x = take x b ++ [shoot'' (b !! x)] ++ drop (x+1) b
+          shoot'' :: Block -> Block
+          shoot'' ShipPart = Hit
+          shoot'' Hit      = Hit
+          shoot'' b        = Miss
 
 
 gameOver :: Board -> Bool
