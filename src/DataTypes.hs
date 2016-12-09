@@ -26,3 +26,6 @@ data Orientation = Vertical | Horizontal
 -- Represents a position on the board with x and y coordinates.
 data Position = Position {x :: Int, y :: Int}
     deriving (Show)
+
+data Player = Player1 | Player2
+    deriving (Show)
