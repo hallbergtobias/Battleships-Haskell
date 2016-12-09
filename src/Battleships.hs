@@ -3,6 +3,24 @@ module Battleship where
 import DataTypes
 import RunGame
 
+impl = Interface
+   { iNewGame = newGame
+   , iPrintGame = printGame
+   , iWinnerIs = winnerIs
+   , iGameOver = gameOver
+   , iShoot = shoot
+   }
+
+main :: IO ()
+main = runGame impl
+
+-- new game
+newGame :: Game
+newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fillBoard
+    where newGame' :: Board -> Board -- for debug only
+          newGame' b = setBlock b (Position 5 5) ShipPart
+
+
 -- tomt spelbräde
 emptyBoard :: Board
 emptyBoard = Board (replicate 10 (replicate 10 Unknown))
@@ -85,16 +103,33 @@ printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
 readGame :: FilePath -> IO Game
 readGame = undefined
 
-
+-- shoots on a position
 shoot :: Board -> Position -> Board
-shoot (Board b) (Position x y) = Board (take y b ++ [shoot' (b !! y) x] ++ drop (y+1) b)
-    where shoot' :: [Block] -> Int -> [Block]
-          shoot' b x = take x b ++ [shoot'' (b !! x)] ++ drop (x+1) b
-          shoot'' :: Block -> Block
+shoot b pos = setBlock b pos (shoot'' (getBlock b pos))
+    where shoot'' :: Block -> Block
           shoot'' ShipPart = Hit
           shoot'' Hit      = Hit
           shoot'' b        = Miss
 
+-- sets a block to a block type
+setBlock :: Board -> Position -> Block -> Board
+setBlock (Board b) (Position x y) block = Board (take y b ++ [setBlock' (b !! y) x block] ++ drop (y+1) b)
+    where setBlock' :: [Block] -> Int -> Block -> [Block]
+          setBlock' b x block = take x b ++ [block] ++ drop (x+1) b
 
-gameOver :: Board -> Bool
-gameOver b = nbrOfHitsLeft b == 0
+-- returns the block at given position
+getBlock :: Board -> Position -> Block
+getBlock (Board b) (Position x y) = (b !! y) !! x
+
+-- checks if game is over for any of the players
+gameOver :: Game -> Bool
+gameOver (Game b1 b2) = boardComplete b1 || boardComplete b2
+
+-- checks if board is complete e.g. no ships left
+boardComplete :: Board -> Bool
+boardComplete b = nbrOfHitsLeft b == 0
+
+-- returns the winner of the game TODO: error if no player won?
+winnerIs :: Game -> Player
+winnerIs (Game board1 board2) | boardComplete board1 = Player1
+                              | otherwise = Player1
