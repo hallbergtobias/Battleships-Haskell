@@ -97,4 +97,4 @@ shoot (Board b) (Position x y) = Board (take y b ++ [shoot' (b !! y) x] ++ drop 
 
 
 gameOver :: Board -> Bool
-gameOver = undefined
+gameOver b = nbrOfHitsLeft b == 0
