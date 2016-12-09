@@ -111,6 +111,16 @@ shoot b pos = setBlock b pos (shoot'' (getBlock b pos))
           shoot'' Hit      = Hit
           shoot'' b        = Miss
 
+-- player computer shoots
+computerShoot :: Board -> Board
+computerShoot = undefined
+
+-- lists positions of blocks that for the player is unexplored (neither of type
+-- hit nor miss)
+listUnexplored :: Board -> [Position]
+listUnexplored = undefined
+
+
 -- sets a block to a block type
 setBlock :: Board -> Position -> Block -> Board
 setBlock (Board b) (Position x y) block = Board (take y b ++ [setBlock' (b !! y) x block] ++ drop (y+1) b)
