@@ -111,6 +111,11 @@ shoot b pos = setBlock b pos (shoot'' (getBlock b pos))
           shoot'' Hit      = Hit
           shoot'' b        = Miss
 
+-- checks if shot hit ship
+isHit :: Board -> Position -> Bool
+isHit b p | getBlock b p == Hit = True
+          | otherwise = False
+
 -- player computer shoots
 computerShoot :: Board -> Board
 computerShoot = undefined
@@ -120,6 +125,41 @@ computerShoot = undefined
 listUnexplored :: Board -> [Position]
 listUnexplored = undefined
 
+-- list positions of blocks that are Hit
+listHits :: Board -> [Position]
+listHits (Board b) = listHits' 0 b
+    where listHits' :: Int -> [[Block]] -> [Position]
+          listHits' _ [] = []
+          listHits' y (x:xs) = listHits'' 0 y x ++ listHits' (y+1) xs
+          listHits'' :: Int -> Int -> [Block] -> [Position]
+          listHits'' _ _ [] = []
+          listHits'' x y (Hit:xs) = [Position x y] ++ listHits'' (x+1) y xs
+          listHits'' x y (_:xs) = listHits'' (x+1) y xs
+
+-- lists all neighouring blocks of position as a list of tuples (Position,Block)
+listAllNeighbours :: Board -> Position -> [(Position, Block)]
+listAllNeighbours b (Position x y) = getBlockIfValid b (Position (x+1) (y+1))
+    ++ getBlockIfValid b (Position (x-1) (y-1))
+    ++ getBlockIfValid b (Position (x-1) (y+1))
+    ++ getBlockIfValid b (Position (x+1) (y-1))
+    ++ listNeighbours b (Position x y)
+
+-- list "direct" neighbouring blocks of position as a list of tuples (Position,Block)
+listNeighbours :: Board -> Position -> [(Position, Block)]
+listNeighbours b (Position x y) = getBlockIfValid b (Position (x+1) y)
+    ++ getBlockIfValid b (Position (x-1) y)
+    ++ getBlockIfValid b (Position x (y+1))
+    ++ getBlockIfValid b (Position x (y-1))
+
+-- returns position and block if valid block
+getBlockIfValid :: Board -> Position -> [(Position,Block)]
+getBlockIfValid b p | isValid p = [(p,getBlock b p)]
+                    | otherwise = []
+
+-- checks if position is within game board boundaries
+isValid :: Position -> Bool
+isValid (Position x y) | x>=0 && x<=9 && y>=0 && y<=9 = True
+                       | otherwise = False
 
 -- sets a block to a block type
 setBlock :: Board -> Position -> Block -> Board
