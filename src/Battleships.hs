@@ -120,6 +120,14 @@ isHit b p | getBlock b p == Hit = True
 computerShoot :: Board -> Board
 computerShoot = undefined
 
+-- returns a random posisiton unexplored
+getRandomPositionUnexplored :: Board -> Position
+getRandomPositionUnexplored = undefined
+
+-- returns a neighbour that could be a part of a Ship
+getPossibleNeighbourShip :: Board -> Position -> Position
+getPossibleNeighbourShip = undefined
+
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
 listUnexplored :: Board -> [Position]
