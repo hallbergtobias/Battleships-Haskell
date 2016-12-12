@@ -2,6 +2,7 @@ module Battleship where
 
 import DataTypes
 import RunGame
+import Data.List
 
 -- tomt spelbräde
 emptyBoard :: Board
@@ -19,6 +20,7 @@ addShipRandom = undefined
 
 
 -- adds a ship at the selected position
+-- CHANGE TO NO GUARDS
 isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
@@ -32,11 +34,40 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList :: [[Block]] -> [Block]
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
-
-
-
+{-
+-- Sending Board all the way through?
 addShip :: Board -> Ship -> Position -> Board
-addShip board (Ship orientation shiptype) pos = undefined
+addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "That position is out of bounds"
+                                  | isShipAddOk board ship (Position x y) = addShip'
+                                  | otherwise = error "There is already a ship there, use eyes maybe?"
+          where
+            addShip' :: Board -> Ship -> Position -> Board
+            addShip' board (Ship Horizontal shiptype) pos =
+              addShip'' (Board matrix) pos ((shipSize shiptype)-1)
+
+          --  addShip' (Board matrix) (Ship Vertical shiptype) (Position x y) =
+            --  addShip''
+
+
+
+            addShip'' :: Board -> Position -> Int -> Board
+            addShip'' _ _ 0 = []
+            addShip'' (Board matrix) (Position x y) i = setBlock (Position ((x+i) y) ShipPart matrix &&
+                            addShip'' (Board matrix) (Position x y) (i-1)
+-}
+-- Takes a matrix of blocks and changes the block at the given position to the
+-- specified block. Returns the resulting matrix.
+setBlock :: Position -> Block -> [[Block]] -> [[Block]]
+setBlock pos block matrix = setBlock' pos block 0 matrix
+      where
+         setBlock' :: Position -> Block -> Int -> [[Block]] -> [[Block]]
+         setBlock' _ _ _ [] = []
+         setBlock' (Position x y) block i (l:ls) | i < y = [l] ++ setBlock' (Position x y) block (i+1) ls
+                                                      | otherwise = [setBlock'' (Position x y) block 0 l] ++ ls
+         setBlock'' :: Position -> Block -> Int -> [Block] -> [Block]
+         setBlock'' _ _ _ [] = []
+         setBlock'' (Position x y) block j (l:ls) | j < x = [l] ++ (setBlock'' (Position x y) block (j+1) ls)
+                                                       | otherwise = [block] ++ ls
 
 
 -- returns the size of a ship
