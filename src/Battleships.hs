@@ -62,18 +62,22 @@ addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "Th
           where
             addShip' :: Board -> Ship -> Position -> Board
             addShip' board (Ship Horizontal shiptype) pos =
-              addShip'' board pos ((shipSize shiptype)-1)
+              addShipHor board pos ((shipSize shiptype)-1)
 
-            addShip' _ _ _ = board
-          --  addShip' (Board matrix) (Ship Vertical shiptype) (Position x y) =
-            --  addShip''
+            addShip' board (Ship Vertical shiptype) pos =
+              addShipVert board pos ((shipSize shiptype)-1)
+
+            addShipHor :: Board -> Position -> Int -> Board
+            addShipHor board pos 0 = setBlock board pos ShipPart
+            addShipHor (Board matrix) (Position x y) i =
+              addShipHor (setBlock (Board matrix) (Position (x+i) y) ShipPart) (Position x y) (i-1)
+
+            addShipVert :: Board -> Position -> Int -> Board
+            addShipVert board pos 0 = setBlock board pos ShipPart
+            addShipVert (Board matrix) (Position x y) i =
+              addShipVert (setBlock (Board matrix) (Position x (y+i)) ShipPart) (Position x y) (i-1)
 
 
-
-            addShip'' :: Board -> Position -> Int -> Board
-            addShip'' board pos 0 = setBlock board pos ShipPart
-            addShip'' (Board matrix) (Position x y) i =
-              addShip'' (setBlock (Board matrix) (Position (x+i) y) ShipPart) (Position x y) (i-1)
 {-
 -- Takes a matrix of blocks and changes the block at the given position to the
 -- specified block. Returns the resulting matrix.
