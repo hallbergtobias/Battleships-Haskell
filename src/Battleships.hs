@@ -162,18 +162,23 @@ getPossibleNeighbourShip = undefined
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
 listUnexplored :: Board -> [Position]
-listUnexplored = undefined
+listUnexplored b = listPositionsOfBlock b Unknown 
+    ++ listPositionsOfBlock b ShipPart
+    ++ listPositionsOfBlock b Swell
 
 -- list positions of blocks that are Hit
 listHits :: Board -> [Position]
-listHits (Board b) = listHits' 0 b
-    where listHits' :: Int -> [[Block]] -> [Position]
-          listHits' _ [] = []
-          listHits' y (x:xs) = listHits'' 0 y x ++ listHits' (y+1) xs
-          listHits'' :: Int -> Int -> [Block] -> [Position]
-          listHits'' _ _ [] = []
-          listHits'' x y (Hit:xs) = [Position x y] ++ listHits'' (x+1) y xs
-          listHits'' x y (_:xs) = listHits'' (x+1) y xs
+listHits b = listPositionsOfBlock b Hit
+
+listPositionsOfBlock :: Board -> Block -> [Position]
+listPositionsOfBlock (Board board) block = listPos' 0 board block
+    where listPos' :: Int -> [[Block]] -> Block -> [Position]
+          listPos' _ [] b = []
+          listPos' y (row:rows) b = listPos'' 0 y row b ++ listPos' (y+1) rows b
+          listPos'' :: Int -> Int -> [Block] -> Block -> [Position]
+          listPos'' _ _ [] b = []
+          listPos'' x y (block:row) b | block==b = [Position x y] ++ listPos'' (x+1) y row b
+                                      | otherwise = listPos'' (x+1) y row b
 
 -- lists all neighouring blocks of position as a list of tuples (Position,Block)
 listAllNeighbours :: Board -> Position -> [(Position, Block)]
