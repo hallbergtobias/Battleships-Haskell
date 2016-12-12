@@ -52,27 +52,28 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList :: [[Block]] -> [Block]
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
-{-
+
 -- Sending Board all the way through?
 addShip :: Board -> Ship -> Position -> Board
 addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "That position is out of bounds"
-                                  | isShipAddOk board ship (Position x y) = addShip'
+                                  | isShipAddOk board ship (Position x y) = addShip' board ship (Position x y)
                                   | otherwise = error "There is already a ship there, use eyes maybe?"
           where
             addShip' :: Board -> Ship -> Position -> Board
             addShip' board (Ship Horizontal shiptype) pos =
-              addShip'' (Board matrix) pos ((shipSize shiptype)-1)
+              addShip'' board pos ((shipSize shiptype)-1)
 
+            addShip' _ _ _ = board
           --  addShip' (Board matrix) (Ship Vertical shiptype) (Position x y) =
             --  addShip''
 
 
 
             addShip'' :: Board -> Position -> Int -> Board
-            addShip'' _ _ 0 = []
-            addShip'' (Board matrix) (Position x y) i = setBlock (Position ((x+i) y) ShipPart matrix &&
-                            addShip'' (Board matrix) (Position x y) (i-1)
--}{-
+            addShip'' board pos 0 = setBlock board pos ShipPart
+            addShip'' (Board matrix) (Position x y) i =
+              addShip'' (setBlock (Board matrix) (Position (x+i) y) ShipPart) (Position x y) (i-1)
+{-
 -- Takes a matrix of blocks and changes the block at the given position to the
 -- specified block. Returns the resulting matrix.
 setBlock :: Position -> Block -> [[Block]] -> [[Block]]
