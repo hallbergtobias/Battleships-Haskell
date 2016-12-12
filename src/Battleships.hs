@@ -3,6 +3,7 @@ module Battleship where
 import DataTypes
 import RunGame
 import Data.List
+import System.Random
 
 impl = Interface
    { iNewGame = newGame
@@ -153,8 +154,10 @@ computerShoot :: Board -> Board
 computerShoot = undefined
 
 -- returns a random posisiton unexplored
-getRandomPositionUnexplored :: Board -> Position
-getRandomPositionUnexplored = undefined
+getRandomPositionUnexplored :: StdGen -> Board -> Position
+getRandomPositionUnexplored stdgen board = list !! index
+    where list = listUnexplored board
+          (index,g2) = randomR (1, length list) stdgen
 
 -- returns a neighbour that could be a part of a Ship
 getPossibleNeighbourShip :: Board -> Position -> Position
@@ -163,7 +166,7 @@ getPossibleNeighbourShip = undefined
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
 listUnexplored :: Board -> [Position]
-listUnexplored b = listPositionsOfBlock b Unknown 
+listUnexplored b = listPositionsOfBlock b Unknown
     ++ listPositionsOfBlock b ShipPart
     ++ listPositionsOfBlock b Swell
 
