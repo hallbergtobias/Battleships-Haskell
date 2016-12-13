@@ -163,9 +163,43 @@ getRandomPositionUnexplored stdgen board = list !! index
     where list = listUnexplored board
           (index,g2) = randomR (1, length list) stdgen
 
--- returns a neighbour that could be a part of a Ship
-getPossibleNeighbourShip :: Board -> Position -> Position
-getPossibleNeighbourShip = undefined
+-- takes a block and a position that is a block of type Hit
+-- returns a neighbour that could be a potential ShipPart
+getPossibleNeighbourShip :: Board -> Position -> [Position]
+getPossibleNeighbourShip b pos = getPossible (listNeighbours b pos) pos
+    where getPossible :: [(Position, Block)] -> Position -> [Position]
+          getPossible list pos = getPossible' list pos (countBlock blocks Hit)
+              where (p,blocks) = unzip list
+          getPossible' :: [(Position, Block)] -> Position -> Int -> [Position]
+          getPossible' list pos 1 = [getOpposite pos (getPositionOfHit list)]
+          getPossible' _ _ 2 = []
+          getPossible' list _ _ = getUnknowns list
+          -- takes two positions, x and y, returns opposite of y from x
+          getOpposite :: Position -> Position -> Position
+          getOpposite (Position a b) (Position c d) = Position (a+(a-c)) (b+(b-d))
+          -- returns position of Hit
+          getPositionOfHit :: [(Position, Block)] -> Position
+          getPositionOfHit ((p,Hit):xs) = p
+          getPositionOfHit (x:xs) = getPositionOfHit xs
+          -- returns positions of unknown blocks
+          getUnknowns :: [(Position, Block)] -> [Position]
+          getUnknowns [] = []
+          getUnknowns ((pos,Hit):xs) = getUnknowns xs
+          getUnknowns ((pos,Miss):xs) = getUnknowns xs
+          getUnknowns ((pos,block):xs) = [pos] ++ getUnknowns xs
+          {-
+          isNeighbourHit :: [(Position, Block)] -> Bool
+          isNeighbourHit list = elem Hit blocks
+              where (pos,blocks) = unzip list
+          isNeighbourUnknown :: [(Position, Block)] -> Bool
+          isNeighbourUnknown = undefined
+          -}
+          --filterPossible :: [(Position, Block)] -> [Position]
+          --filterPossible = undefined
+
+-- counts occurenses of a block in list
+countBlock :: [Block] -> Block -> Int
+countBlock blocks b = length (filter (==b) blocks)
 
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
