@@ -17,6 +17,7 @@ main :: IO ()
 main = runGame impl
 
 -- new game
+
 newGame :: Game
 newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fillBoard
     where newGame' :: Board -> Board -- for debug only
@@ -25,7 +26,7 @@ newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fi
 
 -- tomt spelbräde
 emptyBoard :: Board
-emptyBoard = Board (replicate 10 (replicate 10 Unknown))
+emptyBoard = Board (replicate 10 (replicate 10 Water))
 
 
 -- adds all ships to board
@@ -48,13 +49,13 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' y 0 (shipSize shipT) (vertList (map (drop x) matrix))
        where
           isShipAddOk' :: Int -> Int -> Int -> [Block] -> Bool
-          isShipAddOk' x i sSize list | i < sSize = ((list !! (x+i)) == Unknown) && isShipAddOk' x (i+1) sSize list
+          isShipAddOk' x i sSize list | i < sSize = ((list !! (x+i)) == Water) && isShipAddOk' x (i+1) sSize list
                                       | otherwise = True
           vertList :: [[Block]] -> [Block]
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
--- Sending Board all the way through?
+-- Sending Board all the way through
 addShip :: Board -> Ship -> Position -> Board
 addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "That position is out of bounds"
                                   | isShipAddOk board ship (Position x y) = addShip' board ship (Position x y)
@@ -131,7 +132,7 @@ printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
           printBlock :: Bool -> Block -> String
           printBlock _ Hit = "x "
           printBlock _ Miss = "0 "
-          printBlock _ Unknown = "~ "
+          printBlock _ Water = "~ "
           printBlock _ Swell = "~ "
           printBlock True ShipPart = "~ "
           printBlock _ ShipPart = "• "
@@ -204,7 +205,7 @@ countBlock blocks b = length (filter (==b) blocks)
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
 listUnexplored :: Board -> [Position]
-listUnexplored b = listPositionsOfBlock b Unknown
+listUnexplored b = listPositionsOfBlock b Water
     ++ listPositionsOfBlock b ShipPart
     ++ listPositionsOfBlock b Swell
 
