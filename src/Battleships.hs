@@ -188,15 +188,6 @@ getPossibleNeighbourShip b pos = getPossible (listNeighbours b pos) pos
           getUnknowns ((pos,Hit):xs) = getUnknowns xs
           getUnknowns ((pos,Miss):xs) = getUnknowns xs
           getUnknowns ((pos,block):xs) = [pos] ++ getUnknowns xs
-          {-
-          isNeighbourHit :: [(Position, Block)] -> Bool
-          isNeighbourHit list = elem Hit blocks
-              where (pos,blocks) = unzip list
-          isNeighbourUnknown :: [(Position, Block)] -> Bool
-          isNeighbourUnknown = undefined
-          -}
-          --filterPossible :: [(Position, Block)] -> [Position]
-          --filterPossible = undefined
 
 -- counts occurenses of a block in list
 countBlock :: [Block] -> Block -> Int
