@@ -84,13 +84,14 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
 
 -- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
 -- gives the same results as prop_addShip.
-prop_isShipAddOk :: Board -> Ship -> Position -> Bool
-prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
+--prop_isShipAddOk :: Board -> Ship -> Position -> Bool
+--prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
-
+addShip :: Board -> Ship -> Position -> Board
+addShip = undefined
 -- Blindly adds a ship to the board with the upper left of the ship being at the given
 -- starting position.
-addShip :: Board -> Ship -> Position -> Board
+{-addShip :: Board -> Ship -> Position -> Board
 addShip board (Ship Horizontal shipType) (Position x y)
   = addSwell (addHor board y (map (+x) [0..((shipSize shipType)-1)])) (getSwellPositions (getShipPositions board (Ship Horizontal shipType) (Position x y)) Horizontal)
     where
@@ -105,13 +106,13 @@ addShip board (Ship Vertical shipType) (Position x y)
       addVer board x [y] = setBlock board (Position x y) ShipPart
       addVer (Board matrix) x (y:ys) = addVer (setBlock (Board matrix) (Position x y) ShipPart) x ys
 
-
+-}
 
 addBlocks :: Board -> [Position] -> Block -> Board
-addSwell board [x] block | isValid x = setBlock board x block
-addSwell board [x] block | otherwise = board
-addSwell board (x:xs) block | isValid x = addSwell (setBlock board x block) xs
-addSwell board (x:xs) block | otherwise = addSwell board xs
+addBlocks board [x] block | isValid x = setBlock board x block
+addBlocks board [x] block | otherwise = board
+addBlocks board (x:xs) block | isValid x = addBlocks (setBlock board x block) xs block
+addBlocks board (x:xs) block | otherwise = addBlocks board xs block
 
 
 getShipPositions :: Ship -> Position -> [Position]
