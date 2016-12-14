@@ -126,6 +126,10 @@ intsToPos xs ys = intsToPos' xs ys []
      intsToPos' (x:xs) (y:ys) posList = intsToPos' xs ys ([(Position x y)] ++ posList)
 
 
+addShip2 :: Board -> Ship -> Position -> Board
+addShip2 b (Ship o s) pos = addBlocks (addBlocks b shipPositions ShipPart) swellPositions Swell
+  where shipPositions = getShipPositions b (Ship o s) pos
+        swellPositions = getSwellPositions shipPositions o
 
 -- takes positions of a ship and its orientation, returns a list of positions
 -- were Swell should be added
