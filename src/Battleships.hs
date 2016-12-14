@@ -17,12 +17,12 @@ impl = Interface
 main :: IO ()
 main = runGame impl
 
-level1 = Level [(Carrier,1),(Battleship,2),(Cruiser,3),(Submarine,4),(Destroyer,5)]
+level1 = Level [(Carrier,1),(Battleship,1),(Cruiser,2),(Submarine,3),(Destroyer,2)]
 level2 = Level [(Carrier,1),(Battleship,2)]
 
 -- new game
 newGame :: StdGen -> Game
-newGame g = createGame g level2
+newGame g = createGame g level1
 
 -- creates a game where ships according to Level have been randomly positioned
 createGame :: StdGen -> Level -> Game
@@ -87,8 +87,8 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
 --prop_isShipAddOk :: Board -> Ship -> Position -> Bool
 --prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
-addShip :: Board -> Ship -> Position -> Board
-addShip = undefined
+--addShip :: Board -> Ship -> Position -> Board
+--addShip = undefined
 -- Blindly adds a ship to the board with the upper left of the ship being at the given
 -- starting position.
 {-addShip :: Board -> Ship -> Position -> Board
@@ -125,9 +125,9 @@ intsToPos [] _ = []
 intsToPos _ [] = []
 intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
 
-addShip2 :: Board -> Ship -> Position -> Board
-addShip2 b (Ship o s) pos = addBlocks (addBlocks b shipPositions ShipPart) swellPositions Swell
-  where shipPositions = getShipPositions b (Ship o s) pos
+addShip :: Board -> Ship -> Position -> Board
+addShip b (Ship o s) pos = addBlocks (addBlocks b shipPositions ShipPart) swellPositions Swell
+  where shipPositions = getShipPositions (Ship o s) pos
         swellPositions = getSwellPositions shipPositions o
 
 -- takes positions of a ship and its orientation, returns a list of positions
