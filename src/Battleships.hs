@@ -87,27 +87,9 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
 --prop_isShipAddOk :: Board -> Ship -> Position -> Bool
 --prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
---addShip :: Board -> Ship -> Position -> Board
---addShip = undefined
--- Blindly adds a ship to the board with the upper left of the ship being at the given
--- starting position.
-{-addShip :: Board -> Ship -> Position -> Board
-addShip board (Ship Horizontal shipType) (Position x y)
-  = addSwell (addHor board y (map (+x) [0..((shipSize shipType)-1)])) (getSwellPositions (getShipPositions board (Ship Horizontal shipType) (Position x y)) Horizontal)
-    where
-      addHor :: Board -> Int -> [Int] -> Board
-      addHor board y [x] = setBlock board (Position x y) ShipPart
-      addHor (Board matrix) y (x:xs) = addHor (setBlock (Board matrix) (Position x y) ShipPart) y xs
 
-addShip board (Ship Vertical shipType) (Position x y)
-  = addSwell (addVer board x (map (+y) [0..((shipSize shipType)-1)])) (getSwellPositions (getShipPositions board (Ship Vertical shipType) (Position x y)) Vertical)
-    where
-      addVer :: Board -> Int -> [Int] -> Board
-      addVer board x [y] = setBlock board (Position x y) ShipPart
-      addVer (Board matrix) x (y:ys) = addVer (setBlock (Board matrix) (Position x y) ShipPart) x ys
 
--}
-
+-- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
 addBlocks board [x] block | isValid x = setBlock board x block
 addBlocks board [x] block | otherwise = board
@@ -124,6 +106,7 @@ intsToPos :: [Int] -> [Int] -> [Position]
 intsToPos [] _ = []
 intsToPos _ [] = []
 intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
+
 
 addShip :: Board -> Ship -> Position -> Board
 addShip b (Ship o s) pos = addBlocks (addBlocks b shipPositions ShipPart) swellPositions Swell
