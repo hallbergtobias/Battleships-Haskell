@@ -58,32 +58,6 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
-{-}
--- Adds a ship to the board with the upper left of the ship being at the given
--- starting position. If the position is unvalid or there already lies a ship or
--- ship swell there it returns an error.
-addShip :: Board -> Ship -> Position -> Board
-addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "That position is out of bounds"
-                                  | isShipAddOk board ship (Position x y) = addShip' board ship (Position x y)
-                                  | otherwise = error "There is already a ship there, use eyes maybe?"
-          where
-            addShip' :: Board -> Ship -> Position -> Board
-            addShip' board (Ship Horizontal shiptype) pos =
-              addShipHor board pos ((shipSize shiptype)-1)
-
-            addShip' board (Ship Vertical shiptype) pos =
-              addShipVert board pos ((shipSize shiptype)-1)
-
-            addShipHor :: Board -> Position -> Int -> Board
-            addShipHor board pos 0 = setBlock board pos ShipPart
-            addShipHor (Board matrix) (Position x y) i =
-              addShipHor (setBlock (Board matrix) (Position (x+i) y) ShipPart) (Position x y) (i-1)
-
-            addShipVert :: Board -> Position -> Int -> Board
-            addShipVert board pos 0 = setBlock board pos ShipPart
-            addShipVert (Board matrix) (Position x y) i =
-              addShipVert (setBlock (Board matrix) (Position x (y+i)) ShipPart) (Position x y) (i-1)
--}
 
 -- Adds a ship to the board with the upper left of the ship being at the given
 -- starting position. If the position is unvalid or there already lies a ship or
@@ -108,40 +82,25 @@ addShip' board (Ship Vertical shipType) (Position x y)
       addShipVer (Board matrix) x (y:ys) =  addShipVer (setBlock (Board matrix) (Position x y) ShipPart) x ys
 
 
-{-
--- Tests if addShip really adds a ship at the given positon.
+-- Tests if addShip really adds a ship at the given positon by first counting
+-- the number of ShipParts on the board before and after adding to make sure that
+-- the correct number of ShipParts were added and then checking so that there is
+-- a ShipPart at every position of the added ship.
 prop_addShip :: Board -> Ship -> Position -> Bool
-prop_addShip board (Ship Horizontal shipType) pos =
-                           prop_addShipHor (addShip board (shipSize shipType) pos)
-prop_addShip board (Ship Vertical shipType) pos =
-                           prop_addShipVert (addShip board (shipSize shipType) pos)
-                           where
-                              prop_addShipHor :: Board -> Int -> Position -> Bool
-                              prop_addShipHor _ 0 _ =
-                              prop_addShipHor board i (Position x y) =
-
-
-board = emptyBoard
-shipH = (Ship Horizontal Carrier)
-shipV = (Ship Vertical Battleship)
-pos1 = (Position 1 6)
-pos2 = (Position 2 3)
-
-
--}
-
--- Tests if addShip really adds a ship at the given positon by using addShip
--- and then checking if there is a ShipPart at every position of the added ship.
-prop_addShip :: Board -> Ship -> Position -> Bool
-prop_addShip board (Ship Horizontal shipType) (Position x y) =
-  prop_addShipHor (addShip board (Ship Horizontal shipType) (Position x y)) y (map (+x) [0..((shipSize shipType)-1)])
+prop_addShip board (Ship ori shipType) pos = (((nbrOf board ShipPart) ==
+  ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType))
+  && prop_addShip' board (Ship ori shipType) pos)
+  where
+     prop_addShip' :: Board -> Ship -> Position -> Bool
+     prop_addShip' board (Ship Horizontal shipType) (Position x y) =
+       prop_addShipHor (addShip board (Ship Horizontal shipType) (Position x y)) y (map (+x) [0..((shipSize shipType)-1)])
               where
                 prop_addShipHor :: Board -> Int -> [Int] -> Bool
                 prop_addShipHor _ _ [] = True
                 prop_addShipHor (Board matrix) y (x:xs) =
                   (((matrix !! y) !! x) == ShipPart) && (prop_addShipHor (Board matrix) y xs)
-prop_addShip board (Ship Vertical shipType) (Position x y) =
-  prop_addShipVer (addShip board (Ship Vertical shipType) (Position x y)) x (map (+y) [0..((shipSize shipType)-1)])
+     prop_addShip' board (Ship Vertical shipType) (Position x y) =
+       prop_addShipVer (addShip board (Ship Vertical shipType) (Position x y)) x (map (+y) [0..((shipSize shipType)-1)])
               where
                 prop_addShipVer :: Board -> Int -> [Int] -> Bool
                 prop_addShipVer _ _ [] = True
