@@ -122,7 +122,7 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
           getSides pos Vertical = moveShip pos (-1) 0 ++ moveShip pos 1 0
           moveShip :: [Position] -> Int -> Int -> [Position]
           moveShip [] _ _ = []
-          moveShip ((Position x y):as) dx dy = Position (x+dx) (y+dy) : moveShip as dx dy
+          moveShip (Position x y : as) dx dy = Position (x+dx) (y+dy) : moveShip as dx dy
           -- returns positions of Swell in "corner" of ship
           getCorners :: [Position] -> Orientation -> [Position]
           getCorners pos Horizontal = getCorners' (head pos) Horizontal (-1) 0 ++ getCorners' (last pos) Horizontal 1 0
