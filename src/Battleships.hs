@@ -155,8 +155,16 @@ isHit b p | getBlock b p == Hit = True
           | otherwise = False
 
 -- player computer shoots
-computerShoot :: Board -> Board
-computerShoot = undefined
+computerShoot :: StdGen -> Board -> Board
+computerShoot g b = shoot b (computerShoot' g b)
+    where computerShoot' :: StdGen -> Board -> Position
+          computerShoot' g b = comp'' g b hits
+              where hits = listHits b
+          comp'' :: StdGen -> Board -> [Position] -> Position
+          comp'' g b [] = getRandomPositionUnexplored g b
+          comp'' g b (x:xs) | null pos = comp'' g b xs
+                            | otherwise = head pos
+              where pos = getPossibleNeighbourShip b x
 
 -- returns a random posisiton unexplored
 getRandomPositionUnexplored :: StdGen -> Board -> Position
@@ -167,14 +175,15 @@ getRandomPositionUnexplored stdgen board = list !! index
 -- takes a block and a position that is a block of type Hit
 -- returns a neighbour that could be a potential ShipPart
 getPossibleNeighbourShip :: Board -> Position -> [Position]
-getPossibleNeighbourShip b pos = getPossible (listNeighbours b pos) pos
-    where getPossible :: [(Position, Block)] -> Position -> [Position]
-          getPossible list pos = getPossible' list pos (countBlock blocks Hit)
+getPossibleNeighbourShip b pos = getPossible b (listNeighbours b pos) pos
+    where getPossible :: Board -> [(Position, Block)] -> Position -> [Position]
+          getPossible b list pos = getPossible' b list pos (countBlock blocks Hit)
               where (p,blocks) = unzip list
-          getPossible' :: [(Position, Block)] -> Position -> Int -> [Position]
-          getPossible' list pos 1 = [getOpposite pos (getPositionOfHit list)]
-          getPossible' _ _ 2 = []
-          getPossible' list _ _ = getUnknowns list
+          getPossible' :: Board -> [(Position, Block)] -> Position -> Int -> [Position]
+          getPossible' _ list _ 0 = getUnknowns list
+          getPossible' b list pos 1 | not (isBlockShotAt b opposite) = [opposite]
+              where opposite = getOpposite pos (getPositionOfHit list)
+          getPossible' _ _ _ _ = []
           -- takes two positions, x and y, returns opposite of y from x
           getOpposite :: Position -> Position -> Position
           getOpposite (Position a b) (Position c d) = Position (a+(a-c)) (b+(b-d))
@@ -188,6 +197,12 @@ getPossibleNeighbourShip b pos = getPossible (listNeighbours b pos) pos
           getUnknowns ((pos,Hit):xs) = getUnknowns xs
           getUnknowns ((pos,Miss):xs) = getUnknowns xs
           getUnknowns ((pos,block):xs) = [pos] ++ getUnknowns xs
+
+-- returns True if block is shot at
+isBlockShotAt :: Board -> Position -> Bool
+isBlockShotAt b pos | block==Hit || block == Miss = True
+                    | otherwise = False
+    where block = getBlock b pos
 
 -- counts occurenses of a block in list
 countBlock :: [Block] -> Block -> Int
