@@ -84,8 +84,8 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
 
 -- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
 -- gives the same results as prop_addShip.
---prop_isShipAddOk :: Board -> Ship -> Position -> Bool
---prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
+prop_isShipAddOk :: Board -> Ship -> Position -> Bool
+prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
 
 
@@ -97,6 +97,8 @@ addBlocks board (x:xs) block | isValid x = addBlocks (setBlock board x block) xs
 addBlocks board (x:xs) block | otherwise = addBlocks board xs block
 
 
+-- Takes a ship and the upper left position of the ship and returns
+-- an array of all the ShipPart positions.
 getShipPositions :: Ship -> Position -> [Position]
 getShipPositions (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..((shipSize shipType)-1)]) (replicate (shipSize shipType) y)
 getShipPositions (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..((shipSize shipType)-1)])
@@ -108,6 +110,8 @@ intsToPos _ [] = []
 intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
 
 
+-- Adds a ship at the given position in the ships orientation
+-- where the position is the upper most left part of the ship.
 addShip :: Board -> Ship -> Position -> Board
 addShip b (Ship o s) pos = addBlocks (addBlocks b shipPositions ShipPart) swellPositions Swell
   where shipPositions = getShipPositions (Ship o s) pos
@@ -134,34 +138,19 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
                     makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
                     makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
 
-{-}
+
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
 -- the correct number of ShipParts were added and then checking so that there is
 -- a ShipPart at every position of the added ship.
---
--- Because of addShip not checking if the position is valid to add a ship at,
--- make sure to send in valid positions in this propertycheck by using isShipAddOk first.
 prop_addShip :: Board -> Ship -> Position -> Bool
-prop_addShip board (Ship ori shipType) pos = (((nbrOf board ShipPart) == ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType)) && (((nbrOf board Swell) == ((nbrOf (addShip board (Ship ori shipType) pos) Swell) - shipSize shipType)) && prop_addShip' board (Ship ori shipType) pos)
+prop_addShip board (Ship ori shipType) pos =
+  ((nbrOf board ShipPart) == ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType))
+  && (prop_addShip'' (addShip board (Ship ori shipType) pos) (getShipPositions (Ship ori shipType) pos))
      where
-         prop_addShip' :: Board -> Ship -> Position -> Bool
-         prop_addShip' board (Ship Horizontal shipType) (Position x y) =
-           prop_addShipHor (addShip board (Ship Horizontal shipType) (Position x y)) y (map (+x) [0..((shipSize shipType)-1)])
-              where
-                prop_addShipHor :: Board -> Int -> [Int] -> Bool
-                prop_addShipHor _ _ [] = True
-                prop_addShipHor (Board matrix) y (x:xs) =
-                  (((matrix !! y) !! x) == ShipPart) && (prop_addShipHor (Board matrix) y xs)
-     prop_addShip' board (Ship Vertical shipType) (Position x y) =
-       prop_addShipVer (addShip board (Ship Vertical shipType) (Position x y)) x (map (+y) [0..((shipSize shipType)-1)])
-              where
-                prop_addShipVer :: Board -> Int -> [Int] -> Bool
-                prop_addShipVer _ _ [] = True
-                prop_addShipVer (Board matrix) x (y:ys) =
-                  (((matrix !! x) !! y) == ShipPart) && (prop_addShipVer (Board matrix) x ys)
--}
-
+         prop_addShip'' :: Board -> [Position] -> Bool
+         prop_addShip'' _ [] = True
+         prop_addShip'' board (x:xs) = (getBlock board x) == ShipPart && prop_addShip'' board xs
 
 -- returns the size of a ship
 shipSize :: ShipType -> Int
