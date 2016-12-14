@@ -46,25 +46,25 @@ addShipRandom g b s = addShipRandom' g b s (getRandomOrientation g)
         addShipRandom' g b s o | isShipAddOk b ship pos = addShip b ship pos
                                | otherwise = addShipRandom' g3 b s o
             where ship = Ship o s
-                  pos = (Position x y)
+                  pos = Position x y
                   (x,g2) = randomR (0, maxX ship) g
                   (y,g3) = randomR (1, maxY ship) g2
                   -- returns maximum possible x-coordinate to add ship at
                   maxX :: Ship -> Int
                   maxX (Ship Vertical _) = 9
-                  maxX (Ship Horizontal s) = 10 - (shipSize s)
+                  maxX (Ship Horizontal s) = 10 - shipSize s
                   -- returns maximum possible y-coordinate to add ship at
                   maxY :: Ship -> Int
-                  maxY (Ship Vertical s) = 10 - (shipSize s)
+                  maxY (Ship Vertical s) = 10 - shipSize s
                   maxY (Ship Horizontal _) = 9
 
 -- returns a random orientation, Horizontal or Vertical
 getRandomOrientation :: StdGen -> Orientation
-getRandomOrientation g | (getRandom g)==0 = Horizontal
+getRandomOrientation g | getRandom g ==0 = Horizontal
     where getRandom :: StdGen -> Int
           getRandom g = o
               where (o,g2) = randomR (0, 1) g
-getRandomOrientation g | otherwise = Vertical
+getRandomOrientation g = Vertical
 
 -- Checks whether the given position is a valid position to place a ship in.
 isShipAddOk :: Board -> Ship -> Position -> Bool
@@ -78,31 +78,31 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                                       | otherwise = True
           vertList :: [[Block]] -> [Block]
           vertList [] = []
-          vertList ((x:xs):ys) = [x] ++ vertList ys
+          vertList ((x:xs):ys) = x : vertList ys
 
 -- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
 -- gives the same results as prop_addShip.
 prop_isShipAddOk :: Board -> Ship -> Position -> Bool
-prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
+prop_isShipAddOk board ship pos = isShipAddOk board ship pos == prop_addShip board ship pos
 
 -- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
 addBlocks board [x] block | isValid x = setBlock board x block
-addBlocks board [x] block | otherwise = board
+addBlocks board [x] block = board
 addBlocks board (x:xs) block | isValid x = addBlocks (setBlock board x block) xs block
-addBlocks board (x:xs) block | otherwise = addBlocks board xs block
+addBlocks board (x:xs) block = addBlocks board xs block
 
 -- Takes a ship and the upper left position of the ship and returns
 -- an array of all the ShipPart positions.
 getShipPositions :: Ship -> Position -> [Position]
-getShipPositions (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..((shipSize shipType)-1)]) (replicate (shipSize shipType) y)
-getShipPositions (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..((shipSize shipType)-1)])
+getShipPositions (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..(shipSize shipType - 1)]) (replicate (shipSize shipType) y)
+getShipPositions (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..(shipSize shipType - 1)])
 
 -- takes to list of Ints, x- and y coordinates, and returns a list of positions
 intsToPos :: [Int] -> [Int] -> [Position]
 intsToPos [] _ = []
 intsToPos _ [] = []
-intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
+intsToPos (x:xs) (y:ys) = Position x y : intsToPos xs ys
 
 -- Adds a ship at the given position in the ships orientation
 -- where the position is the upper most left part of the ship.
@@ -138,12 +138,12 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
 -- a ShipPart at every position of the added ship.
 prop_addShip :: Board -> Ship -> Position -> Bool
 prop_addShip board (Ship ori shipType) pos =
-  ((nbrOf board ShipPart) == ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType))
-  && (prop_addShip'' (addShip board (Ship ori shipType) pos) (getShipPositions (Ship ori shipType) pos))
+  (nbrOf board ShipPart == (nbrOf (addShip board (Ship ori shipType) pos) ShipPart - shipSize shipType))
+  && prop_addShip'' (addShip board (Ship ori shipType) pos) (getShipPositions (Ship ori shipType) pos)
      where
          prop_addShip'' :: Board -> [Position] -> Bool
          prop_addShip'' _ [] = True
-         prop_addShip'' board (x:xs) = (getBlock board x) == ShipPart && prop_addShip'' board xs
+         prop_addShip'' board (x:xs) = getBlock board x == ShipPart && prop_addShip'' board xs
 
 -- returns the size of a ship
 shipSize :: ShipType -> Int
@@ -166,7 +166,7 @@ nbrOf :: Board -> Block -> Int
 nbrOf (Board []) block     = 0
 nbrOf (Board (x:xs)) block = nbrOf' x block + nbrOf (Board xs) block
     where nbrOf' :: [Block] -> Block -> Int
-          nbrOf' xs block = length (filter (\x -> x == block) xs)
+          nbrOf' xs block = length (filter (== block) xs)
 
 -- prints a game
 printGame :: Game -> IO ()
@@ -238,7 +238,7 @@ getPossibleNeighbourShip b pos = getPossible b (listNeighbours b pos) pos
           getUnknowns [] = []
           getUnknowns ((pos,Hit):xs) = getUnknowns xs
           getUnknowns ((pos,Miss):xs) = getUnknowns xs
-          getUnknowns ((pos,block):xs) = [pos] ++ getUnknowns xs
+          getUnknowns ((pos,block):xs) = pos : getUnknowns xs
 
 -- returns True if block is shot at
 isBlockShotAt :: Board -> Position -> Bool
@@ -263,13 +263,13 @@ listHits b = listPositionsOfBlock b Hit
 
 -- returns a list of all occurences of a certain block type in a board
 listPositionsOfBlock :: Board -> Block -> [Position]
-listPositionsOfBlock (Board board) block = listPos' 0 board block
+listPositionsOfBlock (Board board) = listPos' 0 board
     where listPos' :: Int -> [[Block]] -> Block -> [Position]
           listPos' _ [] b = []
           listPos' y (row:rows) b = listPos'' 0 y row b ++ listPos' (y+1) rows b
           listPos'' :: Int -> Int -> [Block] -> Block -> [Position]
           listPos'' _ _ [] b = []
-          listPos'' x y (block:row) b | block==b = [Position x y] ++ listPos'' (x+1) y row b
+          listPos'' x y (block:row) b | block==b = Position x y : listPos'' (x+1) y row b
                                       | otherwise = listPos'' (x+1) y row b
 
 -- list neighbouring blocks of position as a list of tuples (Position,Block)
