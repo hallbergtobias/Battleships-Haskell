@@ -46,7 +46,6 @@ addShipRandom = undefined
 isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
-
                                                            | ori == Vertical =
                isShipAddOk' y 0 (shipSize shipT) (vertList (map (drop x) matrix))
        where
@@ -67,18 +66,28 @@ prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip 
 -- Blindly adds a ship to the board with the upper left of the ship being at the given
 -- starting position.
 addShip :: Board -> Ship -> Position -> Board
-addShip board (Ship Horizontal shipType) (Position x y)
-  = addShipHor board y (map (+x) [0..((shipSize shipType)-1)])
+addShip board (Ship Horizontal shipType) (Position x y) | array <- (map (+x) [0..((shipSize shipType)-1)]), array2 <- (map (+y) [-1..1])
+ = addVer (addVer (addHor (addHor (addHor board y array ShipPart) (y-1) array Swell) (y+1) array Swell) (x-1) array2 Swell) (x+(shipSize shipType)) array2 Swell
     where
-      addShipHor :: Board -> Int -> [Int] -> Board
-      addShipHor board y [x] = setBlock board (Position x y) ShipPart
-      addShipHor (Board matrix) y (x:xs) = addShipHor (setBlock (Board matrix) (Position x y) ShipPart) y xs
-addShip board (Ship Vertical shipType) (Position x y)
-  = addShipVer board x (map (+y) [0..((shipSize shipType)-1)])
+      addHor :: Board -> Int -> [Int] -> Block -> Board
+      addHor board y [x] blockType = setBlock board (Position x y) blockType
+      addHor (Board matrix) y (x:xs) blockType = addHor (setBlock (Board matrix) (Position x y) blockType) y xs blockType
+
+      addVer :: Board -> Int -> [Int] -> Block -> Board
+      addVer board x [y] blockType = setBlock board (Position x y) blockType
+      addVer (Board matrix) x (y:ys) blockType = addVer (setBlock (Board matrix) (Position x y) blockType) x ys blockType
+
+
+addShip board (Ship Vertical shipType) (Position x y) | array <- (map (+y) [0..((shipSize shipType)-1)]), array2 <- (map (+x) [-1..1])
+  = addHor (addHor (addVer (addVer (addVer board x array ShipPart) (x-1) array Swell) (x+1) array Swell) (y-1) array2 Swell) (y+(shipSize shipType)) array2 Swell
     where
-      addShipVer :: Board -> Int -> [Int] -> Board
-      addShipVer board x [y] = setBlock board (Position x y) ShipPart
-      addShipVer (Board matrix) x (y:ys) =  addShipVer (setBlock (Board matrix) (Position x y) ShipPart) x ys
+      addHor :: Board -> Int -> [Int] -> Block -> Board
+      addHor board y [x] blockType = setBlock board (Position x y) blockType
+      addHor (Board matrix) y (x:xs) blockType = addHor (setBlock (Board matrix) (Position x y) blockType) y xs blockType
+
+      addVer :: Board -> Int -> [Int] -> Block -> Board
+      addVer board x [y] blockType = setBlock board (Position x y) blockType
+      addVer (Board matrix) x (y:ys) blockType = addVer (setBlock (Board matrix) (Position x y) blockType) x ys blockType
 
 
 -- Tests if addShip really adds a ship at the given positon by first counting
