@@ -14,15 +14,14 @@ impl = Interface
    , iComputerShoot = computerShoot
    }
 
+-- starts the game
 main :: IO ()
 main = runGame impl
 
-level1 = Level [(Carrier,1),(Battleship,1),(Cruiser,2),(Submarine,3),(Destroyer,2)]
-level2 = Level [(Carrier,1),(Battleship,2)]
-
 -- new game
 newGame :: StdGen -> Game
-newGame g = createGame g level1
+newGame g = createGame g level
+    where level = Level [(Carrier,1),(Battleship,1),(Cruiser,2),(Submarine,3),(Destroyer,2)]
 
 -- creates a game where ships according to Level have been randomly positioned
 createGame :: StdGen -> Level -> Game
@@ -87,10 +86,9 @@ prop_isShipAddOk board ship pos = isShipAddOk board ship pos == prop_addShip boa
 
 -- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
-addBlocks board [x] block | isValid x = setBlock board x block
-addBlocks board [x] block = board
+addBlocks board [] _ = board
 addBlocks board (x:xs) block | isValid x = addBlocks (setBlock board x block) xs block
-addBlocks board (x:xs) block = addBlocks board xs block
+                             | otherwise = addBlocks board xs block
 
 -- Takes a ship and the upper left position of the ship and returns
 -- an array of all the ShipPart positions.
