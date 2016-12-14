@@ -122,8 +122,8 @@ addShip board (Ship Vertical shipType) (Position x y) | array <- (map (+y) [0..(
 -- Because of addShip not checking if the position is valid to add a ship at,
 -- make sure to send in valid positions in this propertycheck by using isShipAddOk first.
 prop_addShip :: Board -> Ship -> Position -> Bool
-prop_addShip board (Ship ori shipType) pos = (nbrOf board ShipPart) ==
-  ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType)
+prop_addShip board (Ship ori shipType) pos = nbrOf board ShipPart ==
+  (nbrOf (addShip board (Ship ori shipType) pos) ShipPart - shipSize shipType)
   && prop_addShip' board (Ship ori shipType) pos
   where
      prop_addShip' :: Board -> Ship -> Position -> Bool
@@ -176,7 +176,7 @@ printGame :: Game -> IO ()
 printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
     ++ printGame' False b1 ++ "\n----Enemy ships----\n" ++ printGame' True b2)
     where printGame' :: Bool -> [[Block]] -> String
-          printGame' secret b = concatMap (++"\n") (map (concatMap (printBlock secret)) b)
+          printGame' secret b = unlines (map (concatMap (printBlock secret)) b)
           printBlock :: Bool -> Block -> String
           printBlock _ Hit = "x "
           printBlock _ Miss = "0 "
@@ -269,7 +269,7 @@ listHits :: Board -> [Position]
 listHits b = listPositionsOfBlock b Hit
 
 listPositionsOfBlock :: Board -> Block -> [Position]
-listPositionsOfBlock (Board board) block = listPos' 0 board block
+listPositionsOfBlock (Board board) = listPos' 0 board
     where listPos' :: Int -> [[Block]] -> Block -> [Position]
           listPos' _ [] b = []
           listPos' y (row:rows) b = listPos'' 0 y row b ++ listPos' (y+1) rows b
