@@ -7,7 +7,6 @@ import System.Random
 
 impl = Interface
    { iNewGame = newGame
-   , iTestGame = testGame
    , iPrintGame = printGame
    , iWinnerIs = winnerIs
    , iGameOver = gameOver
@@ -18,28 +17,53 @@ impl = Interface
 main :: IO ()
 main = runGame impl
 
--- new game
-newGame :: Game
-newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fillBoard
-    where newGame' :: Board -> Board -- for debug only
-          newGame' b = setBlock b (Position 5 5) ShipPart
+level1 = Level [(Carrier,1),(Battleship,2),(Cruiser,3),(Submarine,4),(Destroyer,5)]
 
-testGame :: Game
-testGame = Game (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]]) (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Miss,ShipPart,ShipPart,ShipPart,ShipPart,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]])
+-- new game
+newGame :: StdGen -> Game
+newGame g = createGame g level1
+
+-- creates a game where ships according to Level have been randomly positioned
+createGame :: StdGen -> Level -> Game
+createGame g lvl = Game (createBoard g lvl emptyBoard) (createBoard g lvl emptyBoard)
+    where createBoard :: StdGen -> Level -> Board -> Board
+          createBoard _ (Level []) b = b
+          createBoard g (Level ((s,n):xs)) b = createBoard g (Level xs) (createBoard' g s n b)
+              where createBoard' :: StdGen -> ShipType -> Int -> Board -> Board
+                    createBoard' _ _ 0 b = b
+                    createBoard' g s n b = createBoard' g1 s (n-1) (addShipRandom g1 b s)
+                        where (r,g1) = random g :: (Int,StdGen)
 
 -- Returns an empty board
 emptyBoard :: Board
 emptyBoard = Board (replicate 10 (replicate 10 Water))
 
-
--- Adds all ships to board
-fillBoard :: Board -> Board
-fillBoard = undefined
-
-
 -- Adds a ship at a random position on the board
-addShipRandom :: Board -> ShipType -> Board
-addShipRandom = undefined
+addShipRandom :: StdGen -> Board -> ShipType -> Board
+addShipRandom g b s = addShipRandom' g b s (getRandomOrientation g)
+  where addShipRandom' :: StdGen -> Board -> ShipType -> Orientation -> Board
+        addShipRandom' g b s o | isShipAddOk b ship pos = addShip b ship pos
+                               | otherwise = addShipRandom' g3 b s o
+            where ship = Ship o s
+                  pos = (Position x y)
+                  (x,g2) = randomR (0, maxX ship) g
+                  (y,g3) = randomR (1, maxY ship) g2
+                  -- returns maximum possible x-coordinate to add ship at
+                  maxX :: Ship -> Int
+                  maxX (Ship Vertical _) = 9
+                  maxX (Ship Horizontal s) = 10 - (shipSize s)
+                  -- returns maximum possible y-coordinate to add ship at
+                  maxY :: Ship -> Int
+                  maxY (Ship Vertical s) = 10 - (shipSize s)
+                  maxY (Ship Horizontal _) = 9
+
+-- returns a random orientation, Horizontal or Vertical
+getRandomOrientation :: StdGen -> Orientation
+getRandomOrientation g | (getRandom g)==0 = Horizontal
+    where getRandom :: StdGen -> Int
+          getRandom g = o
+              where (o,g2) = randomR (0, 1) g
+getRandomOrientation g | otherwise = Vertical
 
 
 -- Checks whether the given position is a valid position to place a ship in.

@@ -29,3 +29,6 @@ data Position = Position {x :: Int, y :: Int}
 
 data Player = Player | Computer
     deriving (Show)
+
+data Level = Level {allShips :: [(ShipType,Int)]}
+    deriving (Show)
