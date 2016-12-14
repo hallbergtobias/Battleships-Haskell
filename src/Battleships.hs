@@ -7,10 +7,12 @@ import System.Random
 
 impl = Interface
    { iNewGame = newGame
+   , iTestGame = testGame
    , iPrintGame = printGame
    , iWinnerIs = winnerIs
    , iGameOver = gameOver
    , iShoot = shoot
+   , iComputerShoot = computerShoot
    }
 
 main :: IO ()
@@ -22,6 +24,8 @@ newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fi
     where newGame' :: Board -> Board -- for debug only
           newGame' b = setBlock b (Position 5 5) ShipPart
 
+testGame :: Game
+testGame = Game (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]]) (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Miss,ShipPart,ShipPart,ShipPart,ShipPart,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]])
 
 -- Returns an empty board
 emptyBoard :: Board
@@ -221,8 +225,17 @@ isHit b p | getBlock b p == Hit = True
           | otherwise = False
 
 -- player computer shoots
-computerShoot :: Board -> Board
-computerShoot = undefined
+computerShoot :: StdGen -> Board -> Board
+computerShoot g b = shoot b (computerShoot' g b)
+    where computerShoot' :: StdGen -> Board -> Position
+          computerShoot' g b = comp'' g b hits
+              where hits = listHits b
+          comp'' :: StdGen -> Board -> [Position] -> Position
+          comp'' g b [] = getRandomPositionUnexplored g b
+          comp'' g b (x:xs) | null validPositions = comp'' g b xs
+                            | otherwise = head validPositions
+              where validPositions = filter isValid pos
+                    pos = getPossibleNeighbourShip b x
 
 -- returns a random posisiton unexplored
 getRandomPositionUnexplored :: StdGen -> Board -> Position
@@ -230,9 +243,41 @@ getRandomPositionUnexplored stdgen board = list !! index
     where list = listUnexplored board
           (index,g2) = randomR (1, length list) stdgen
 
--- returns a neighbour that could be a part of a Ship
-getPossibleNeighbourShip :: Board -> Position -> Position
-getPossibleNeighbourShip = undefined
+-- takes a block and a position that is a block of type Hit
+-- returns a neighbour that could be a potential ShipPart
+getPossibleNeighbourShip :: Board -> Position -> [Position]
+getPossibleNeighbourShip b pos = getPossible b (listNeighbours b pos) pos
+    where getPossible :: Board -> [(Position, Block)] -> Position -> [Position]
+          getPossible b list pos = getPossible' b list pos (countBlock blocks Hit)
+              where (p,blocks) = unzip list
+          getPossible' :: Board -> [(Position, Block)] -> Position -> Int -> [Position]
+          getPossible' _ list _ 0 = getUnknowns list
+          getPossible' b list pos 1 | not (isBlockShotAt b opposite) = [opposite]
+              where opposite = getOpposite pos (getPositionOfHit list)
+          getPossible' _ _ _ _ = []
+          -- takes two positions, x and y, returns opposite of y from x
+          getOpposite :: Position -> Position -> Position
+          getOpposite (Position a b) (Position c d) = Position (a+(a-c)) (b+(b-d))
+          -- returns position of Hit
+          getPositionOfHit :: [(Position, Block)] -> Position
+          getPositionOfHit ((p,Hit):xs) = p
+          getPositionOfHit (x:xs) = getPositionOfHit xs
+          -- returns positions of unknown blocks
+          getUnknowns :: [(Position, Block)] -> [Position]
+          getUnknowns [] = []
+          getUnknowns ((pos,Hit):xs) = getUnknowns xs
+          getUnknowns ((pos,Miss):xs) = getUnknowns xs
+          getUnknowns ((pos,block):xs) = [pos] ++ getUnknowns xs
+
+-- returns True if block is shot at
+isBlockShotAt :: Board -> Position -> Bool
+isBlockShotAt b pos | block==Hit || block == Miss = True
+                    | otherwise = False
+    where block = getBlock b pos
+
+-- counts occurenses of a block in list
+countBlock :: [Block] -> Block -> Int
+countBlock blocks b = length (filter (==b) blocks)
 
 -- lists positions of blocks that for the player is unexplored (neither of type
 -- hit nor miss)
@@ -300,5 +345,5 @@ boardComplete b = nbrOfHitsLeft b == 0
 
 -- returns the winner of the game TODO: error if no player won?
 winnerIs :: Game -> Player
-winnerIs (Game board1 board2) | boardComplete board1 = Player1
-                              | otherwise = Player1
+winnerIs (Game board1 board2) | boardComplete board1 = Computer
+                              | otherwise = Player
