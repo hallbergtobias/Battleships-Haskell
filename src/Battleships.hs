@@ -113,7 +113,8 @@ addSwell board (x:xs) | otherwise = addSwell board xs
 
 
 
-
+-- takes positions of a ship and its orientation, returns a list of positions
+-- were Swell should be added
 getSwellPositions :: [Position] -> Orientation -> [Position]
 getSwellPositions pos o = getSides pos o ++ getCorners pos o
     where -- returns positions of Swell on side of ship
