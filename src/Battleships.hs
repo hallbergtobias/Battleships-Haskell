@@ -66,7 +66,6 @@ getRandomOrientation g | (getRandom g)==0 = Horizontal
               where (o,g2) = randomR (0, 1) g
 getRandomOrientation g | otherwise = Vertical
 
-
 -- Checks whether the given position is a valid position to place a ship in.
 isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
@@ -81,13 +80,10 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
-
 -- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
 -- gives the same results as prop_addShip.
 prop_isShipAddOk :: Board -> Ship -> Position -> Bool
 prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
-
-
 
 -- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
@@ -96,19 +92,17 @@ addBlocks board [x] block | otherwise = board
 addBlocks board (x:xs) block | isValid x = addBlocks (setBlock board x block) xs block
 addBlocks board (x:xs) block | otherwise = addBlocks board xs block
 
-
 -- Takes a ship and the upper left position of the ship and returns
 -- an array of all the ShipPart positions.
 getShipPositions :: Ship -> Position -> [Position]
 getShipPositions (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..((shipSize shipType)-1)]) (replicate (shipSize shipType) y)
 getShipPositions (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..((shipSize shipType)-1)])
 
-
+-- takes to list of Ints, x- and y coordinates, and returns a list of positions
 intsToPos :: [Int] -> [Int] -> [Position]
 intsToPos [] _ = []
 intsToPos _ [] = []
 intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
-
 
 -- Adds a ship at the given position in the ships orientation
 -- where the position is the upper most left part of the ship.
@@ -137,7 +131,6 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
               where makeThree :: Position -> Orientation -> [Position]
                     makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
                     makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
-
 
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
@@ -188,10 +181,6 @@ printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
           printBlock _ Swell = "~ "
           printBlock Computer ShipPart = "~ "
           printBlock _ ShipPart = "• "
-
-
-readGame :: FilePath -> IO Game
-readGame = undefined
 
 -- shoots on a position
 shoot :: Board -> Position -> Board
@@ -272,6 +261,7 @@ listUnexplored b = listPositionsOfBlock b Water
 listHits :: Board -> [Position]
 listHits b = listPositionsOfBlock b Hit
 
+-- returns a list of all occurences of a certain block type in a board
 listPositionsOfBlock :: Board -> Block -> [Position]
 listPositionsOfBlock (Board board) block = listPos' 0 board block
     where listPos' :: Int -> [[Block]] -> Block -> [Position]
@@ -282,15 +272,7 @@ listPositionsOfBlock (Board board) block = listPos' 0 board block
           listPos'' x y (block:row) b | block==b = [Position x y] ++ listPos'' (x+1) y row b
                                       | otherwise = listPos'' (x+1) y row b
 
--- lists all neighouring blocks of position as a list of tuples (Position,Block)
-listAllNeighbours :: Board -> Position -> [(Position, Block)]
-listAllNeighbours b (Position x y) = getBlockIfValid b (Position (x+1) (y+1))
-    ++ getBlockIfValid b (Position (x-1) (y-1))
-    ++ getBlockIfValid b (Position (x-1) (y+1))
-    ++ getBlockIfValid b (Position (x+1) (y-1))
-    ++ listNeighbours b (Position x y)
-
--- list "direct" neighbouring blocks of position as a list of tuples (Position,Block)
+-- list neighbouring blocks of position as a list of tuples (Position,Block)
 listNeighbours :: Board -> Position -> [(Position, Block)]
 listNeighbours b (Position x y) = getBlockIfValid b (Position (x+1) y)
     ++ getBlockIfValid b (Position (x-1) y)
