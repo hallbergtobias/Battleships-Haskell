@@ -27,5 +27,5 @@ data Orientation = Vertical | Horizontal
 data Position = Position {x :: Int, y :: Int}
     deriving (Show)
 
-data Player = Player1 | Player2
+data Player = Player | Computer
     deriving (Show)
