@@ -19,23 +19,28 @@ runGame :: Interface -> IO ()
 runGame i = do
   putStrLn "Battleships"
   --gameLoop i (iNewGame i)
-  gameLoop i (iTestGame i)
+  gameLoop i (iTestGame i) Player
 
 -- loops game until someone wins
-gameLoop :: Interface -> Game -> IO ()
-gameLoop i (Game b1 b2) = do
+gameLoop :: Interface -> Game -> Player -> IO ()
+gameLoop i (Game b1 b2) Computer = do
+  if iGameOver i (Game b1 b2) then do
+      quitGame i (Game b1 b2)
+    else do
+        g <- newStdGen
+        let updBoard1 = iComputerShoot i g b1
+        gameLoop i (Game updBoard1 b2) Player
+gameLoop i (Game b1 b2) Player = do
   iPrintGame i (Game b1 b2)
   if iGameOver i (Game b1 b2) then do
-      putStrLn ("Game over! " ++ show (iWinnerIs i (Game b1 b2)) ++ " won!")
+      quitGame i (Game b1 b2)
     else do
-      answer <- validInput
-      g <- newStdGen
-      let (x,y) = getPosition answer
-          updBoard2 = iShoot i b2 (Position x y)
-          updBoard1 = iComputerShoot i g b1
-      gameLoop i (Game updBoard1 updBoard2)
-      where getPosition :: String -> (Int,Int)
-            getPosition answer = (digitToInt (head answer),digitToInt (head(drop 2 answer)))
+        answer <- validInput
+        let (x,y) = getPosition answer
+            updBoard2 = iShoot i b2 (Position x y)
+        gameLoop i (Game b1 updBoard2) Computer
+        where getPosition :: String -> (Int,Int)
+              getPosition answer = (digitToInt (head answer),digitToInt (head(drop 2 answer)))
 
 -- returns input in the format "x y"
 validInput :: IO String
@@ -49,3 +54,6 @@ validInput = do
        putStrLn "didn't quite catch that..."
        h <- validInput
        return h
+
+quitGame :: Interface -> Game -> IO ()
+quitGame i (Game b1 b2) = putStrLn ("Game over! " ++ show (iWinnerIs i (Game b1 b2)) ++ " won!")
