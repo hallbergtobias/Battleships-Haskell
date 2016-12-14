@@ -7,7 +7,6 @@ import System.Random
 
 impl = Interface
    { iNewGame = newGame
-   , iTestGame = testGame
    , iPrintGame = printGame
    , iWinnerIs = winnerIs
    , iGameOver = gameOver
@@ -34,9 +33,6 @@ createGame g lvl = Game (createBoard g lvl emptyBoard) (createBoard g lvl emptyB
                     createBoard' _ _ 0 b = b
                     createBoard' g s n b = createBoard' g1 s (n-1) (addShipRandom g1 b s)
                         where (r,g1) = random g :: (Int,StdGen)
-
-testGame :: Game
-testGame = Game (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]]) (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Miss,ShipPart,ShipPart,ShipPart,ShipPart,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]])
 
 -- Returns an empty board
 emptyBoard :: Board
