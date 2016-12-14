@@ -91,13 +91,15 @@ prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip 
 -- Blindly adds a ship to the board with the upper left of the ship being at the given
 -- starting position.
 addShip :: Board -> Ship -> Position -> Board
-addShip board (Ship Horizontal shipType) (Position x y) = addHor board y (map (+x) [0..((shipSize shipType)-1)])
+addShip board (Ship Horizontal shipType) (Position x y)
+  = addHor board y (map (+x) [0..((shipSize shipType)-1)])
     where
       addHor :: Board -> Int -> [Int] -> Board
       addHor board y [x] = setBlock board (Position x y) ShipPart
       addHor (Board matrix) y (x:xs) = addHor (setBlock (Board matrix) (Position x y) ShipPart) y xs
 
-addShip board (Ship Vertical shipType) (Position x y) = addVer board x (map (+y) [0..((shipSize shipType)-1)])
+addShip board (Ship Vertical shipType) (Position x y)
+  = addVer board x (map (+y) [0..((shipSize shipType)-1)])
     where
       addVer :: Board -> Int -> [Int] -> Board
       addVer board x [y] = setBlock board (Position x y) ShipPart
@@ -110,6 +112,18 @@ addSwell board [x] | otherwise = board
 addSwell board (x:xs) | isValid x = addSwell (setBlock board x Swell) xs
 addSwell board (x:xs) | otherwise = addSwell board xs
 
+
+getShipPositions :: Board -> Ship -> Position -> [Position]
+getShipPositions board (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..((shipSize shipType)-1)]) (replicate (shipSize shipType) y)
+getShipPositions board (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..((shipSize shipType)-1)])
+
+intsToPos :: [Int] -> [Int] -> [Position]
+intsToPos xs ys = intsToPos' xs ys []
+   where
+     intsToPos' :: [Int] -> [Int] -> [Position] -> [Position]
+     intsToPos' [] _ posList = posList
+     intsToPos' _ [] posList = posList
+     intsToPos' (x:xs) (y:ys) posList = intsToPos' xs ys ([(Position x y)] ++ posList)
 
 
 -- Tests if addShip really adds a ship at the given positon by first counting
