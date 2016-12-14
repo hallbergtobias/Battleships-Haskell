@@ -152,10 +152,6 @@ shipSize Cruiser = 3
 shipSize Battleship = 4
 shipSize Carrier = 5
 
--- return the number of ships on a board
-nbrOfShips :: Board -> Int
-nbrOfShips = undefined
-
 -- returns the number of hits on a board
 nbrOfHits :: Board -> Int
 nbrOfHits b = nbrOf b Hit
@@ -174,15 +170,15 @@ nbrOf (Board (x:xs)) block = nbrOf' x block + nbrOf (Board xs) block
 -- prints a game
 printGame :: Game -> IO ()
 printGame (Game (Board b1) (Board b2)) = putStrLn("-----Your ships----\n"
-    ++ printGame' False b1 ++ "\n----Enemy ships----\n" ++ printGame' True b2)
-    where printGame' :: Bool -> [[Block]] -> String
-          printGame' secret b = unlines (map (concatMap (printBlock secret)) b)
-          printBlock :: Bool -> Block -> String
+    ++ printGame' Player b1 ++ "\n----Enemy ships----\n" ++ printGame' Computer b2)
+    where printGame' :: Player -> [[Block]] -> String
+          printGame' player b = unlines (map (concatMap (printBlock player)) b)
+          printBlock :: Player -> Block -> String
           printBlock _ Hit = "x "
           printBlock _ Miss = "0 "
           printBlock _ Water = "~ "
           printBlock _ Swell = "~ "
-          printBlock True ShipPart = "~ "
+          printBlock Computer ShipPart = "~ "
           printBlock _ ShipPart = "• "
 
 
