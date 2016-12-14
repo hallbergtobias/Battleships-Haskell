@@ -17,7 +17,7 @@ impl = Interface
 main :: IO ()
 main = runGame impl
 
-level1 = Level [(Carrier,1),(Battleship,2),(Cruiser,3),(Submarine,4),(Destroyer,5)]
+level1 = Level [(Carrier,1),(Battleship,2)]
 
 -- new game
 newGame :: StdGen -> Game
@@ -113,6 +113,10 @@ addShip board (Ship Vertical shipType) (Position x y) | array <- (map (+y) [0..(
       addVer board x [y] blockType = setBlock board (Position x y) blockType
       addVer (Board matrix) x (y:ys) blockType = addVer (setBlock (Board matrix) (Position x y) blockType) x ys blockType
 
+
+addSwell :: Board -> [Position] -> Board
+addSwell board [x] = setBlock board x Swell
+addSwell board x:xs | isValid x = addSwell (setBlock board x Swell) xs
 
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
