@@ -66,8 +66,7 @@ getRandomOrientation g | (getRandom g)==0 = Horizontal
 getRandomOrientation g | otherwise = Vertical
 
 
--- CHANGE TO NO GUARDS
--- Checks if the given position is a valid place for a ship.
+-- Checks whether the given position is a valid position to place a ship in.
 isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
@@ -83,22 +82,22 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
 
--- Adds a ship to the board with the upper left of the ship being at the given
--- starting position. If the position is unvalid or there already lies a ship or
--- ship swell there it returns an error.
-addShip :: Board -> Ship -> Position -> Board
-addShip board ship (Position x y) | x < 0 || x > 9 || y < 0 || y > 9 = error "That position is out of bounds"
-                       | isShipAddOk board ship (Position x y) = addShip' board ship (Position x y)
-                       | otherwise = error "Unvalid position: The position is touching another ship's or its surrounding blocks's"
+-- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
+-- gives the same results as prop_addShip.
+prop_isShipAddOk :: Board -> Ship -> Position -> Bool
+prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
-addShip' :: Board -> Ship -> Position -> Board
-addShip' board (Ship Horizontal shipType) (Position x y)
+
+-- Blindly adds a ship to the board with the upper left of the ship being at the given
+-- starting position.
+addShip :: Board -> Ship -> Position -> Board
+addShip board (Ship Horizontal shipType) (Position x y)
   = addShipHor board y (map (+x) [0..((shipSize shipType)-1)])
     where
       addShipHor :: Board -> Int -> [Int] -> Board
       addShipHor board y [x] = setBlock board (Position x y) ShipPart
       addShipHor (Board matrix) y (x:xs) = addShipHor (setBlock (Board matrix) (Position x y) ShipPart) y xs
-addShip' board (Ship Vertical shipType) (Position x y)
+addShip board (Ship Vertical shipType) (Position x y)
   = addShipVer board x (map (+y) [0..((shipSize shipType)-1)])
     where
       addShipVer :: Board -> Int -> [Int] -> Board
@@ -110,6 +109,9 @@ addShip' board (Ship Vertical shipType) (Position x y)
 -- the number of ShipParts on the board before and after adding to make sure that
 -- the correct number of ShipParts were added and then checking so that there is
 -- a ShipPart at every position of the added ship.
+--
+-- Because of addShip not checking if the position is valid to add a ship at,
+-- make sure to send in valid positions in this propertycheck by using isShipAddOk first.
 prop_addShip :: Board -> Ship -> Position -> Bool
 prop_addShip board (Ship ori shipType) pos = (((nbrOf board ShipPart) ==
   ((nbrOf (addShip board (Ship ori shipType) pos) ShipPart) - shipSize shipType))
@@ -132,22 +134,6 @@ prop_addShip board (Ship ori shipType) pos = (((nbrOf board ShipPart) ==
                   (((matrix !! x) !! y) == ShipPart) && (prop_addShipVer (Board matrix) x ys)
 
 
-
-{-
--- Takes a matrix of blocks and changes the block at the given position to the
--- specified block. Returns the resulting matrix.
-setBlock :: Position -> Block -> [[Block]] -> [[Block]]
-setBlock pos block matrix = setBlock' pos block 0 matrix
-      where
-         setBlock' :: Position -> Block -> Int -> [[Block]] -> [[Block]]
-         setBlock' _ _ _ [] = []
-         setBlock' (Position x y) block i (l:ls) | i < y = [l] ++ setBlock' (Position x y) block (i+1) ls
-                                                      | otherwise = [setBlock'' (Position x y) block 0 l] ++ ls
-         setBlock'' :: Position -> Block -> Int -> [Block] -> [Block]
-         setBlock'' _ _ _ [] = []
-         setBlock'' (Position x y) block j (l:ls) | j < x = [l] ++ (setBlock'' (Position x y) block (j+1) ls)
-                                                       | otherwise = [block] ++ ls
--}
 
 -- returns the size of a ship
 shipSize :: ShipType -> Int
