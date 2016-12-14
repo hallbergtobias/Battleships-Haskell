@@ -11,6 +11,7 @@ impl = Interface
    , iWinnerIs = winnerIs
    , iGameOver = gameOver
    , iShoot = shoot
+   , iComputerShoot = computerShoot
    }
 
 main :: IO ()
@@ -162,9 +163,10 @@ computerShoot g b = shoot b (computerShoot' g b)
               where hits = listHits b
           comp'' :: StdGen -> Board -> [Position] -> Position
           comp'' g b [] = getRandomPositionUnexplored g b
-          comp'' g b (x:xs) | null pos = comp'' g b xs
-                            | otherwise = head pos
-              where pos = getPossibleNeighbourShip b x
+          comp'' g b (x:xs) | null validPositions = comp'' g b xs
+                            | otherwise = head validPositions
+              where validPositions = filter isValid pos
+                    pos = getPossibleNeighbourShip b x
 
 -- returns a random posisiton unexplored
 getRandomPositionUnexplored :: StdGen -> Board -> Position
