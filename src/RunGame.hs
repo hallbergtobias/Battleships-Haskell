@@ -5,8 +5,7 @@ import DataTypes
 import System.Random
 
 data Interface = Interface
-    { iNewGame   :: Game
-    , iTestGame :: Game
+    { iNewGame   :: StdGen -> Game
     , iPrintGame :: Game -> IO ()
     , iWinnerIs :: Game -> Player
     , iGameOver :: Game -> Bool
@@ -18,8 +17,8 @@ data Interface = Interface
 runGame :: Interface -> IO ()
 runGame i = do
   putStrLn "Battleships"
-  --gameLoop i (iNewGame i)
-  gameLoop i (iTestGame i) Player
+  g <- newStdGen
+  gameLoop i (iNewGame i g) Player
 
 -- loops game until someone wins
 gameLoop :: Interface -> Game -> Player -> IO ()
