@@ -41,7 +41,7 @@ gameLoop i (Game b1 b2) Player = do
         where getPosition :: String -> (Int,Int)
               getPosition answer = (digitToInt (head answer),digitToInt (head(drop 2 answer)))
 
--- returns input in the format "x y"
+-- asks player for coordinates to shoot, returns input in the format "x y"
 validInput :: IO String
 validInput = do
    putStrLn "choose position to shoot [x y]"
@@ -54,5 +54,6 @@ validInput = do
        h <- validInput
        return h
 
+-- presents the winner of the game
 quitGame :: Interface -> Game -> IO ()
 quitGame i (Game b1 b2) = putStrLn ("Game over! " ++ show (iWinnerIs i (Game b1 b2)) ++ " won!")
