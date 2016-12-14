@@ -120,18 +120,19 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
           getSides :: [Position] -> Orientation -> [Position]
           getSides pos Horizontal = moveShip pos 0 (-1) ++ moveShip pos 0 1
           getSides pos Vertical = moveShip pos (-1) 0 ++ moveShip pos 1 0
+          moveShip :: [Position] -> Int -> Int -> [Position]
+          moveShip [] _ _ = []
+          moveShip ((Position x y):as) dx dy = Position (x+dx) (y+dy) : moveShip as dx dy
           -- returns positions of Swell in "corner" of ship
           getCorners :: [Position] -> Orientation -> [Position]
           getCorners pos Horizontal = getCorners' (head pos) Horizontal (-1) 0 ++ getCorners' (last pos) Horizontal 1 0
           getCorners pos Vertical = getCorners' (head pos) Vertical 0 (-1) ++ getCorners' (last pos) Vertical 0 1
           getCorners' :: Position -> Orientation -> Int -> Int -> [Position]
           getCorners' (Position x y) o dx dy = makeThree (Position (x+dx) (y+dy)) o
-          makeThree :: Position -> Orientation -> [Position]
-          makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
-          makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
-          moveShip :: [Position] -> Int -> Int -> [Position]
-          moveShip [] _ _ = []
-          moveShip ((Position x y):as) dx dy = Position (x+dx) (y+dy) : moveShip as dx dy
+              where makeThree :: Position -> Orientation -> [Position]
+                    makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
+                    makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
+
 
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
