@@ -58,9 +58,10 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
 
---prop_isShipAddOk :: Board -> Ship -> Position -> Bool
---prop_isShipAddOk board ship pos = (isShipAddOk board ship pos) == prop_addShip
-
+-- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
+-- gives the same results as prop_addShip.
+prop_isShipAddOk :: Board -> Ship -> Position -> Bool
+prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip board ship pos)
 
 
 -- Blindly adds a ship to the board with the upper left of the ship being at the given
