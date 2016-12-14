@@ -7,6 +7,7 @@ import System.Random
 
 impl = Interface
    { iNewGame = newGame
+   , iTestGame = testGame
    , iPrintGame = printGame
    , iWinnerIs = winnerIs
    , iGameOver = gameOver
@@ -24,6 +25,8 @@ newGame = Game (newGame' emptyBoard)  (newGame' emptyBoard) --TODO: should be fi
     where newGame' :: Board -> Board -- for debug only
           newGame' b = setBlock b (Position 5 5) ShipPart
 
+testGame :: Game
+testGame = Game (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]]) (Board [[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Miss,ShipPart,ShipPart,ShipPart,ShipPart,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,Water,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water],[Water,Water,Water,Water,ShipPart,Water,Water,Water,Water,Water]])
 
 -- tomt spelbräde
 emptyBoard :: Board
@@ -276,5 +279,5 @@ boardComplete b = nbrOfHitsLeft b == 0
 
 -- returns the winner of the game TODO: error if no player won?
 winnerIs :: Game -> Player
-winnerIs (Game board1 board2) | boardComplete board1 = Player1
-                              | otherwise = Player1
+winnerIs (Game board1 board2) | boardComplete board1 = Computer
+                              | otherwise = Player
