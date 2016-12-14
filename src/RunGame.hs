@@ -2,20 +2,24 @@ module RunGame where
 
 import Data.Char
 import DataTypes
+import System.Random
 
 data Interface = Interface
     { iNewGame   :: Game
+    , iTestGame :: Game
     , iPrintGame :: Game -> IO ()
     , iWinnerIs :: Game -> Player
     , iGameOver :: Game -> Bool
     , iShoot :: Board -> Position -> Board
+    , iComputerShoot :: StdGen -> Board -> Board
     }
 
 -- starts game
 runGame :: Interface -> IO ()
 runGame i = do
   putStrLn "Battleships"
-  gameLoop i (iNewGame i)
+  --gameLoop i (iNewGame i)
+  gameLoop i (iTestGame i)
 
 -- loops game until someone wins
 gameLoop :: Interface -> Game -> IO ()
@@ -25,9 +29,11 @@ gameLoop i (Game b1 b2) = do
       putStrLn ("Game over! " ++ show (iWinnerIs i (Game b1 b2)) ++ " won!")
     else do
       answer <- validInput
+      g <- newStdGen
       let (x,y) = getPosition answer
-          updb2 = iShoot i b2 (Position x y)
-      gameLoop i (Game b1 updb2)
+          updBoard2 = iShoot i b2 (Position x y)
+          updBoard1 = iComputerShoot i g b1
+      gameLoop i (Game updBoard1 updBoard2)
       where getPosition :: String -> (Int,Int)
             getPosition answer = (digitToInt (head answer),digitToInt (head(drop 2 answer)))
 
