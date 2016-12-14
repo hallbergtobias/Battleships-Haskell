@@ -117,14 +117,11 @@ getShipPositions :: Board -> Ship -> Position -> [Position]
 getShipPositions board (Ship Horizontal shipType) (Position x y) = intsToPos (map (+x) [0..((shipSize shipType)-1)]) (replicate (shipSize shipType) y)
 getShipPositions board (Ship Vertical shipType) (Position x y) = intsToPos (replicate (shipSize shipType) x) (map (+y) [0..((shipSize shipType)-1)])
 
-intsToPos :: [Int] -> [Int] -> [Position]
-intsToPos xs ys = intsToPos' xs ys []
-   where
-     intsToPos' :: [Int] -> [Int] -> [Position] -> [Position]
-     intsToPos' [] _ posList = posList
-     intsToPos' _ [] posList = posList
-     intsToPos' (x:xs) (y:ys) posList = intsToPos' xs ys ([(Position x y)] ++ posList)
 
+intsToPos :: [Int] -> [Int] -> [Position]
+intsToPos [] _ = []
+intsToPos _ [] = []
+intsToPos (x:xs) (y:ys) = [Position x y] ++ intsToPos xs ys
 
 
 -- takes positions of a ship and its orientation, returns a list of positions
