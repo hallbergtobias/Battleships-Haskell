@@ -92,14 +92,14 @@ prop_isShipAddOk board ship pos = ((isShipAddOk board ship pos) == prop_addShip 
 -- starting position.
 addShip :: Board -> Ship -> Position -> Board
 addShip board (Ship Horizontal shipType) (Position x y)
-  = addHor board y (map (+x) [0..((shipSize shipType)-1)])
+  = addSwell (addHor board y (map (+x) [0..((shipSize shipType)-1)])) (getSwellPositions (getShipPositions board (Ship Horizontal shipType) (Position x y)) Horizontal)
     where
       addHor :: Board -> Int -> [Int] -> Board
       addHor board y [x] = setBlock board (Position x y) ShipPart
       addHor (Board matrix) y (x:xs) = addHor (setBlock (Board matrix) (Position x y) ShipPart) y xs
 
 addShip board (Ship Vertical shipType) (Position x y)
-  = addVer board x (map (+y) [0..((shipSize shipType)-1)])
+  = addSwell (addVer board x (map (+y) [0..((shipSize shipType)-1)])) (getSwellPositions (getShipPositions board (Ship Vertical shipType) (Position x y)) Vertical)
     where
       addVer :: Board -> Int -> [Int] -> Board
       addVer board x [y] = setBlock board (Position x y) ShipPart
