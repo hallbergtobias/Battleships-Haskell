@@ -17,11 +17,12 @@ impl = Interface
 main :: IO ()
 main = runGame impl
 
-level1 = Level [(Carrier,1),(Battleship,2)]
+level1 = Level [(Carrier,1),(Battleship,2),(Cruiser,3),(Submarine,4),(Destroyer,5)]
+level2 = Level [(Carrier,1),(Battleship,2)]
 
 -- new game
 newGame :: StdGen -> Game
-newGame g = createGame g level1
+newGame g = createGame g level2
 
 -- creates a game where ships according to Level have been randomly positioned
 createGame :: StdGen -> Level -> Game
