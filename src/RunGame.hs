@@ -34,25 +34,24 @@ gameLoop i (Game b1 b2) Player = do
   if iGameOver i (Game b1 b2) then do
       quitGame i (Game b1 b2)
     else do
-        answer <- validInput
-        let (x,y) = getPosition answer
-            updBoard2 = iShoot i b2 (Position x y)
+        pos <- validPosition
+        let updBoard2 = iShoot i b2 pos
         gameLoop i (Game b1 updBoard2) Computer
-        where getPosition :: String -> (Int,Int)
-              getPosition answer = (digitToInt (head answer),digitToInt (head(drop 2 answer)))
 
--- asks player for coordinates to shoot, returns input in the format "x y"
-validInput :: IO String
-validInput = do
+-- asks player for coordinates to shoot, returns position
+validPosition :: IO Position
+validPosition = do
    putStrLn "choose position to shoot [x y]"
    answer <- getLine
    if (length answer == 3) && isDigit (head answer)
      && isDigit (head (drop 2 answer))
-     then return answer
+     then return (getPosition answer)
      else do
        putStrLn "didn't quite catch that..."
-       h <- validInput
+       h <- validPosition
        return h
+   where getPosition :: String -> Position
+         getPosition answer = Position (digitToInt (head answer)) (digitToInt (head(drop 2 answer)))
 
 -- presents the winner of the game
 quitGame :: Interface -> Game -> IO ()
