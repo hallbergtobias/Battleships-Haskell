@@ -13,6 +13,7 @@ data Block = Water | ShipPart | Swell | Hit | Miss
     deriving (Eq,Show)
 
 data Ship = Ship {orientation :: Orientation, shipType :: ShipType}
+    deriving (Show)
 
 -- There are 5 different ship types which differ in size, from size 1
 -- to size 5.

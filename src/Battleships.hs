@@ -4,6 +4,7 @@ import DataTypes
 import RunGame
 import Data.List
 import System.Random
+import Test.QuickCheck
 
 impl = Interface
    { iNewGame = newGame
@@ -73,11 +74,12 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
                isShipAddOk' y 0 (shipSize shipT) (vertList (map (drop x) matrix))
        where
           isShipAddOk' :: Int -> Int -> Int -> [Block] -> Bool
-          isShipAddOk' x i sSize list | i < sSize = ((list !! (x+i)) == Water) && isShipAddOk' x (i+1) sSize list
+          isShipAddOk' x i sSize list | (x+i) >= 10 = False
+                                      | i < (sSize-1) = ((list !! (x+i)) == Water) && isShipAddOk' x (i+1) sSize list
                                       | otherwise = True
           vertList :: [[Block]] -> [Block]
           vertList [] = []
-          vertList ((x:xs):ys) = x : vertList ys
+          vertList ((x:xs):ys) = [x] ++ vertList ys
 
 -- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
 -- gives the same results as prop_addShip.
@@ -130,14 +132,42 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
                     makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
                     makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
 
+
+-- an instance for generating Arbitrary Sudokus
+instance Arbitrary Board where
+  arbitrary = do
+    return (emptyBoard)
+
+--       addShipRandom :: StdGen -> Board -> ShipType -> Board
+
+instance Arbitrary Orientation where
+  arbitrary = oneof [return Vertical, return Horizontal]
+
+instance Arbitrary ShipType where
+  arbitrary = oneof [return Destroyer, return Submarine, return Cruiser, return Battleship, return Carrier]
+
+instance Arbitrary Ship where
+  arbitrary = do
+    orientation <- arbitrary
+    shipType <- arbitrary
+    return (Ship orientation shipType)
+
+instance Arbitrary Position where
+  arbitrary = do
+    x <- choose (0,9)
+    y <- choose (0,9)
+    return (Position x y)
+
+
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
 -- the correct number of ShipParts were added and then checking so that there is
 -- a ShipPart at every position of the added ship.
 prop_addShip :: Board -> Ship -> Position -> Bool
-prop_addShip board (Ship ori shipType) pos =
-  (nbrOf board ShipPart == (nbrOf (addShip board (Ship ori shipType) pos) ShipPart - shipSize shipType))
+prop_addShip board (Ship ori shipType) pos | isShipAddOk board (Ship ori shipType) pos =
+  (nbrOf board ShipPart) + shipSize shipType == (nbrOf (addShip board (Ship ori shipType) pos) ShipPart)
   && prop_addShip'' (addShip board (Ship ori shipType) pos) (getShipPositions (Ship ori shipType) pos)
+                                           | otherwise = True
      where
          prop_addShip'' :: Board -> [Position] -> Bool
          prop_addShip'' _ [] = True
