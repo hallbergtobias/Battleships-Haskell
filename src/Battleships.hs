@@ -81,11 +81,6 @@ isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
           vertList [] = []
           vertList ((x:xs):ys) = [x] ++ vertList ys
 
--- Checks whether or not isShipAddOk is working by making sure that isShipAddOk
--- gives the same results as prop_addShip.
-prop_isShipAddOk :: Board -> Ship -> Position -> Bool
-prop_isShipAddOk board ship pos = isShipAddOk board ship pos == prop_addShip board ship pos
-
 -- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
 addBlocks board [] _ = board
@@ -133,12 +128,9 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
                     makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
 
 
--- an instance for generating Arbitrary Sudokus
 instance Arbitrary Board where
   arbitrary = do
     return (emptyBoard)
-
---       addShipRandom :: StdGen -> Board -> ShipType -> Board
 
 instance Arbitrary Orientation where
   arbitrary = oneof [return Vertical, return Horizontal]
