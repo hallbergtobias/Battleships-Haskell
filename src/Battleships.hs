@@ -6,6 +6,31 @@ import Data.List
 import System.Random
 import Test.QuickCheck
 
+instance Arbitrary Board where
+  arbitrary = do
+    n <- choose (0,4)
+    m <- arbitrary
+    shipTypes <- vectorOf n $ elements [Destroyer, Submarine, Cruiser, Battleship, Carrier]
+    return (foldr (addShipRandom (mkStdGen m)) emptyBoard shipTypes)
+
+instance Arbitrary Orientation where
+  arbitrary = oneof [return Vertical, return Horizontal]
+
+instance Arbitrary ShipType where
+  arbitrary = oneof [return Destroyer, return Submarine, return Cruiser, return Battleship, return Carrier]
+
+instance Arbitrary Ship where
+  arbitrary = do
+    orientation <- arbitrary
+    shipType <- arbitrary
+    return (Ship orientation shipType)
+
+instance Arbitrary Position where
+  arbitrary = do
+    x <- choose (0,9)
+    y <- choose (0,9)
+    return (Position x y)
+
 impl = Interface
    { iNewGame = newGame
    , iPrintGame = printGame
@@ -32,7 +57,7 @@ createGame g lvl = Game (createBoard g lvl emptyBoard) (createBoard g lvl emptyB
           createBoard g (Level ((s,n):xs)) b = createBoard g (Level xs) (createBoard' g s n b)
               where createBoard' :: StdGen -> ShipType -> Int -> Board -> Board
                     createBoard' _ _ 0 b = b
-                    createBoard' g s n b = createBoard' g1 s (n-1) (addShipRandom g1 b s)
+                    createBoard' g s n b = createBoard' g1 s (n-1) (addShipRandom g1 s b)
                         where (r,g1) = random g :: (Int,StdGen)
 
 -- Returns an empty board
@@ -40,8 +65,8 @@ emptyBoard :: Board
 emptyBoard = Board (replicate 10 (replicate 10 Water))
 
 -- Adds a ship at a random position on the board
-addShipRandom :: StdGen -> Board -> ShipType -> Board
-addShipRandom g b s = addShipRandom' g b s (getRandomOrientation g)
+addShipRandom :: StdGen -> ShipType -> Board -> Board
+addShipRandom g s b = addShipRandom' g b s (getRandomOrientation g)
   where addShipRandom' :: StdGen -> Board -> ShipType -> Orientation -> Board
         addShipRandom' g b s o | isShipAddOk b ship pos = addShip b ship pos
                                | otherwise = addShipRandom' g3 b s o
@@ -69,17 +94,13 @@ getRandomOrientation g = Vertical
 -- Checks whether the given position is a valid position to place a ship in.
 isShipAddOk :: Board -> Ship -> Position -> Bool
 isShipAddOk (Board matrix) (Ship ori shipT) (Position x y) | ori == Horizontal =
-               isShipAddOk' x 0 (shipSize shipT) (matrix !! y)
+               isShipAddOk' x (shipSize shipT) (matrix !! y)
                                                            | ori == Vertical =
-               isShipAddOk' y 0 (shipSize shipT) (vertList (map (drop x) matrix))
+               isShipAddOk' y (shipSize shipT) (map (head) $ map (drop x) matrix)
        where
-          isShipAddOk' :: Int -> Int -> Int -> [Block] -> Bool
-          isShipAddOk' x i sSize list | (x+i) >= 10 = False
-                                      | i < (sSize-1) = ((list !! (x+i)) == Water) && isShipAddOk' x (i+1) sSize list
-                                      | otherwise = True
-          vertList :: [[Block]] -> [Block]
-          vertList [] = []
-          vertList ((x:xs):ys) = [x] ++ vertList ys
+          isShipAddOk' :: Int -> Int -> [Block] -> Bool
+          isShipAddOk' x sSize list | (x+sSize) >= 10 = False
+                                    | otherwise = and $ map (==Water) (take sSize $ drop x list)
 
 -- Blindly adds blocks of type Block to a board according to an array of positions.
 addBlocks :: Board -> [Position] -> Block -> Board
@@ -126,30 +147,6 @@ getSwellPositions pos o = getSides pos o ++ getCorners pos o
               where makeThree :: Position -> Orientation -> [Position]
                     makeThree (Position x y) Vertical = [Position (x-1) y] ++ [Position x y] ++ [Position (x+1) y]
                     makeThree (Position x y) Horizontal = [Position x (y-1)] ++ [Position x y] ++ [Position x (y+1)]
-
-
-instance Arbitrary Board where
-  arbitrary = do
-    return (emptyBoard)
-
-instance Arbitrary Orientation where
-  arbitrary = oneof [return Vertical, return Horizontal]
-
-instance Arbitrary ShipType where
-  arbitrary = oneof [return Destroyer, return Submarine, return Cruiser, return Battleship, return Carrier]
-
-instance Arbitrary Ship where
-  arbitrary = do
-    orientation <- arbitrary
-    shipType <- arbitrary
-    return (Ship orientation shipType)
-
-instance Arbitrary Position where
-  arbitrary = do
-    x <- choose (0,9)
-    y <- choose (0,9)
-    return (Position x y)
-
 
 -- Tests if addShip really adds a ship at the given positon by first counting
 -- the number of ShipParts on the board before and after adding to make sure that
